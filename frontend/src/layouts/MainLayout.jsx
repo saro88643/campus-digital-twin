@@ -14,12 +14,14 @@ import {
   X,
   Search,
   GraduationCap,
-  Wrench
+  Wrench,
+  FileSpreadsheet
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const { userInfo, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +30,7 @@ const MainLayout = () => {
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: true },
+    { to: '/admin/digital-twin', label: 'College Data Center', icon: FileSpreadsheet, adminOnly: true },
     { to: '/campus-twin', label: 'Campus Twin', icon: Network },
     { to: '/blocks', label: 'Blocks', icon: Building2 },
     { to: '/classrooms', label: 'Classrooms', icon: DoorOpen },
@@ -42,6 +45,12 @@ const MainLayout = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter' && globalSearchTerm.trim()) {
+      navigate(`/classrooms?search=${encodeURIComponent(globalSearchTerm.trim())}`);
+    }
   };
 
   return (
@@ -63,12 +72,12 @@ const MainLayout = () => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-            <div className="flex items-center justify-center w-10 h-10 bg-sidebar-primary rounded-lg">
+            <div className="flex items-center justify-center w-10 h-10 bg-sidebar-primary rounded-lg shadow-lg">
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-display text-lg font-bold text-white tracking-tight">Campus Twin</h1>
-              <p className="text-[10px] text-gray-400 uppercase tracking-widest">Digital Platform</p>
+              <h1 className="font-display text-base font-bold text-white tracking-tight">SmartNavClass</h1>
+              <p className="text-[9px] text-blue-300 font-bold uppercase tracking-widest">SIET Digital Twin</p>
             </div>
           </div>
 
@@ -125,14 +134,17 @@ const MainLayout = () => {
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Search bar placeholder */}
+          {/* Global Search bar */}
           <div className="hidden md:flex items-center flex-1 max-w-md ml-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search anything..."
-                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 border-transparent rounded-lg focus:bg-white focus:border-sidebar-primary focus:ring-0 transition-all"
+                placeholder="Search rooms, labs, or faculty (Press Enter)..."
+                value={globalSearchTerm}
+                onChange={(e) => setGlobalSearchTerm(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                className="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 border-transparent rounded-lg focus:bg-white focus:border-sidebar-primary focus:ring-0 transition-all font-medium"
               />
             </div>
           </div>
@@ -140,7 +152,7 @@ const MainLayout = () => {
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium">{formatDate(new Date())}</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">Campus Time</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">SIET Campus Time</p>
             </div>
           </div>
         </header>
@@ -156,7 +168,6 @@ const MainLayout = () => {
   );
 };
 
-// Helper inside MainLayout just for now
 const formatDate = (date) => {
   return date.toLocaleDateString('en-US', {
     weekday: 'short',

@@ -16,9 +16,23 @@ const floorSchema = mongoose.Schema(
       required: true,
     },
     description: String,
+    floorPlanImage: String, // Data URL or Image URL
+    calibration: {
+      realWidthMeters: { type: Number, default: 50 },
+      realHeightMeters: { type: Number, default: 30 },
+      unit: { type: String, default: 'meters' },
+    },
+    isPublished: {
+      type: Boolean,
+      default: false,
+    },
+    version: {
+      type: Number,
+      default: 1,
+    },
     status: {
       type: String,
-      enum: ['Active', 'Inactive'],
+      enum: ['Active', 'Inactive', 'Draft', 'Published', 'Archived'],
       default: 'Active',
     },
   },

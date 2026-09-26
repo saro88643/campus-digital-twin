@@ -11,6 +11,15 @@ import RoomDetailPage from '../pages/RoomDetailPage';
 import FacilitiesPage from '../pages/FacilitiesPage';
 import DepartmentsPage from '../pages/DepartmentsPage';
 import DepartmentDetailPage from '../pages/DepartmentDetailPage';
+
+// Digital Twin Module Pages
+import DigitalTwinNavigationPage from '../pages/DigitalTwinNavigationPage';
+import CollegeDataCenterPage from '../pages/admin/digital-twin/CollegeDataCenterPage';
+import AdminFloorEditorPage from '../pages/admin/digital-twin/AdminFloorEditorPage';
+import DataImportExportPage from '../pages/admin/digital-twin/DataImportExportPage';
+import ValidationPage from '../pages/admin/digital-twin/ValidationPage';
+
+// Admin Pages
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import ManageUsers from '../pages/admin/ManageUsers';
 import ManageBlocks from '../pages/admin/ManageBlocks';
@@ -57,6 +66,9 @@ const AppRoutes = () => {
         <Route path="/classrooms" element={<ClassroomsPage />} />
         <Route path="/rooms/:id" element={<RoomDetailPage />} />
 
+        {/* Digital Twin Indoor Navigation Page */}
+        <Route path="/digital-twin/navigate/:roomId" element={<DigitalTwinNavigationPage />} />
+
         <Route path="/facilities" element={<FacilitiesPage />} />
 
         <Route path="/departments" element={<DepartmentsPage />} />
@@ -64,6 +76,11 @@ const AppRoutes = () => {
 
         {/* Admin Only Routes */}
         <Route path="/dashboard" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/digital-twin" element={<ProtectedRoute adminOnly><CollegeDataCenterPage /></ProtectedRoute>} />
+        <Route path="/admin/digital-twin/editor/:floorId" element={<ProtectedRoute adminOnly><AdminFloorEditorPage /></ProtectedRoute>} />
+        <Route path="/admin/digital-twin/import-export" element={<ProtectedRoute adminOnly><DataImportExportPage /></ProtectedRoute>} />
+        <Route path="/admin/digital-twin/validation" element={<ProtectedRoute adminOnly><ValidationPage /></ProtectedRoute>} />
+
         <Route path="/admin/users" element={<ProtectedRoute adminOnly><ManageUsers /></ProtectedRoute>} />
         <Route path="/admin/blocks" element={<ProtectedRoute adminOnly><ManageBlocks /></ProtectedRoute>} />
         <Route path="/admin/floors" element={<ProtectedRoute adminOnly><ManageFloors /></ProtectedRoute>} />

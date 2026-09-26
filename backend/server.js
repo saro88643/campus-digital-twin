@@ -17,6 +17,11 @@ import departmentRoutes from './routes/departmentRoutes.js';
 import facilityRoutes from './routes/facilityRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import digitalTwinRoutes from './routes/digitalTwinRoutes.js';
+import navigationRoutes from './routes/navigationRoutes.js';
+import importExportRoutes from './routes/importExportRoutes.js';
+import facultyRoutes from './routes/facultyRoutes.js';
+import assetRoutes from './routes/assetRoutes.js';
 
 // Load env vars
 dotenv.config();
@@ -32,7 +37,7 @@ app.use(cors()); // Enable CORS
 app.use(mongoSanitize()); // Prevent NoSQL injection
 
 // Body parser
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Support base64 floor plan images
 
 // Dev logging middleware
 if (process.env.NODE_ENV !== 'production') {
@@ -49,6 +54,11 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/facilities', facilityRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/digital-twin', digitalTwinRoutes);
+app.use('/api/navigation', navigationRoutes);
+app.use('/api/import-export', importExportRoutes);
+app.use('/api/faculty', facultyRoutes);
+app.use('/api/assets', assetRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -11,8 +11,34 @@ const blockSchema = mongoose.Schema(
       required: [true, 'Please add a block code'],
       unique: true,
     },
+    buildingType: {
+      type: String,
+      enum: [
+        'Academic',
+        'Administrative',
+        'Laboratory',
+        'Hostel',
+        'Library',
+        'Sports',
+        'Food Court',
+        'Canteen',
+        'Auditorium',
+        'Research',
+        'Other',
+      ],
+      default: 'Academic',
+    },
+    floorsCount: {
+      type: Number,
+      default: 3,
+    },
     description: String,
     location: String,
+    coordinates: {
+      latitude: Number,
+      longitude: Number,
+    },
+    digitalTwinId: String,
     departments: [
       {
         type: mongoose.Schema.Types.ObjectId,

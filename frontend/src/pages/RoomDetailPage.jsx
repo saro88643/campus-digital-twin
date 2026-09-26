@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   Loader2,
   Contact,
+  Navigation,
+  Compass,
   Info
 } from 'lucide-react';
 import api from '../services/api';
@@ -89,7 +91,7 @@ const RoomDetailPage = () => {
           {/* Room Dossier Card */}
           <section className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
             <div className="p-8 lg:p-10">
-              <div className="flex flex-wrap items-start justify-between gap-6 mb-10">
+              <div className="flex flex-wrap items-start justify-between gap-6 mb-8">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-widest mb-4">
                     {room?.roomType} · Unit ID: {room?.roomNumber}
@@ -100,9 +102,19 @@ const RoomDetailPage = () => {
                     {room?.block?.name} · {room?.floor?.name} (Level {room?.floor?.floorNumber})
                   </p>
                 </div>
-                <div className={`px-5 py-2.5 rounded-2xl border-2 font-black uppercase tracking-widest text-xs flex items-center gap-2 ${getStatusTone(room?.status)}`}>
-                  <CircleIcon status={room?.status} />
-                  {room?.status}
+
+                <div className="flex flex-col items-end gap-3">
+                  <button
+                    onClick={() => navigate(`/digital-twin/navigate/${room?._id}`)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider shadow-xl shadow-blue-200 transition-all flex items-center gap-2"
+                  >
+                    <Navigation className="w-4 h-4" /> FIND PATH
+                  </button>
+
+                  <div className={`px-4 py-2 rounded-xl border-2 font-black uppercase tracking-widest text-[10px] flex items-center gap-2 ${getStatusTone(room?.status)}`}>
+                    <CircleIcon status={room?.status} />
+                    {room?.status}
+                  </div>
                 </div>
               </div>
 

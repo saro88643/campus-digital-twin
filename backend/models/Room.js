@@ -42,6 +42,10 @@ const roomSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Department',
     },
+    assignedFaculty: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Faculty',
+    },
     capacity: {
       type: Number,
       default: 0,
@@ -63,6 +67,29 @@ const roomSchema = mongoose.Schema(
       enum: ['Available', 'Occupied', 'Under Maintenance', 'Temporarily Closed'],
       default: 'Available',
     },
+    // Digital Twin Mapping attributes
+    digitalTwinMapped: {
+      type: Boolean,
+      default: false,
+    },
+    geometry: {
+      x: Number,
+      y: Number,
+      width: Number,
+      height: Number,
+      points: [
+        {
+          x: Number,
+          y: Number,
+        },
+      ],
+    },
+    entrance: {
+      x: Number,
+      y: Number,
+      doorName: String,
+    },
+    navigationNodeId: String,
     assignedStaff: String,
     workingHours: String,
     purpose: String,

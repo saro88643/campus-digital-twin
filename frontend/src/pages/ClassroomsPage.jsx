@@ -17,22 +17,25 @@ import {
   Edit,
   Trash2,
   Clock,
-  User as UserIcon,
-  Contact as ContactIcon,
+  Navigation,
+  Compass,
   Info
 } from 'lucide-react';
 import api from '../services/api';
 import useAuth from '../hooks/useAuth';
 import { getStatusTone } from '../utils/formatters';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const ClassroomsPage = () => {
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
   const [rooms, setRooms] = useState([]);
   const [blocks, setBlocks] = useState([]);
   const [floors, setFloors] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showModal, setShowModal] = useState(false);
@@ -313,9 +316,16 @@ const ClassroomsPage = () => {
                   {room.roomNumber}
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusTone(room.status)}`}>
-                    {room.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                      room.digitalTwinMapped ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200'
+                    }`}>
+                      {room.digitalTwinMapped ? 'Mapped ✓' : 'Not Mapped'}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusTone(room.status)}`}>
+                      {room.status}
+                    </span>
+                  </div>
                   {isAdmin && (
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
@@ -348,7 +358,7 @@ const ClassroomsPage = () => {
                   </div>
                 </div>
 
-                <div className="space-y-3 mb-8">
+                <div className="space-y-3 mb-6">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">Category</span>
                     <span className="font-bold text-gray-900 px-2 py-0.5 bg-gray-50 rounded-md text-[10px] uppercase">{room.roomType}</span>
@@ -367,24 +377,19 @@ const ClassroomsPage = () => {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {Object.entries(room.facilities || {}).slice(0, 3).map(([key, value]) => value && (
-                    <div key={key} className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400" title={key}>
-                      <Wrench className="w-3.5 h-3.5" />
-                    </div>
-                  ))}
-                  {Object.values(room.facilities || {}).filter(Boolean).length > 3 && (
-                    <div className="text-[10px] font-black text-gray-300 ml-1">
-                      +{Object.values(room.facilities || {}).filter(Boolean).length - 3} MORE
-                    </div>
-                  )}
-                </div>
+              {/* Action Buttons: Find Path & Specifications */}
+              <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
+                <button
+                  onClick={() => navigate(`/digital-twin/navigate/${room._id}`)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5"
+                >
+                  <Navigation className="w-3.5 h-3.5" /> Find Path
+                </button>
                 <button
                   onClick={() => navigate(`/rooms/${room._id}`)}
-                  className="flex items-center gap-1.5 text-blue-600 font-bold text-sm hover:translate-x-1 transition-transform"
+                  className="text-gray-500 hover:text-blue-600 font-bold text-xs flex items-center gap-1 transition-colors px-2"
                 >
-                  Specifications <ChevronRight className="w-4 h-4" />
+                  Specs <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
