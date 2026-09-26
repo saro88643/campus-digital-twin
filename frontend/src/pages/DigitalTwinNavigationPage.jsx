@@ -99,7 +99,7 @@ const DigitalTwinNavigationPage = () => {
 
   const isAdminBlock = destinationRoom?.block?.code === 'ADMB' || destinationRoom?.block?.name?.includes('Admin');
 
-  // Helper to get room location coordinates for path line drawing
+  // Helper to get exact room location coordinates for pin placement
   const getRoomCenterPos = (roomNum) => {
     const num = roomNum?.toUpperCase() || '';
 
@@ -135,31 +135,41 @@ const DigitalTwinNavigationPage = () => {
     if (num === 'LH23') return { x: 640, y: 380 };
 
     // Admin Block Ground Floor
-    if (num === 'LH51') return { x: 245, y: 90 };
-    if (num === 'LH52') return { x: 190, y: 90 };
-    if (num === 'LH50') return { x: 660, y: 260 };
+    if (num === 'LH51') return { x: 212, y: 90 };
+    if (num === 'LH52') return { x: 157, y: 90 };
+    if (num === 'LH50') return { x: 615, y: 230 };
 
     // Admin Block 1st Floor
-    if (num === 'LH36') return { x: 550, y: 360 };
-    if (num === 'CL01') return { x: 645, y: 360 };
-    if (num === 'LH37') return { x: 840, y: 360 };
-    if (num === 'LH30') return { x: 550, y: 270 };
+    if (num === 'LH36') return { x: 520, y: 330 };
+    if (num === 'CL01') return { x: 605, y: 330 };
+    if (num === 'LH37') return { x: 812, y: 330 };
+    if (num === 'LH30') return { x: 550, y: 230 };
 
     // Admin Block 2nd Floor
-    if (num === 'LH38') return { x: 560, y: 360 };
-    if (num === 'CL02') return { x: 660, y: 360 };
-    if (num === 'CL03') return { x: 750, y: 360 };
-    if (num === 'LH39') return { x: 850, y: 360 };
-    if (num === 'LH32') return { x: 560, y: 270 };
-    if (num === 'LH53') return { x: 630, y: 270 };
-    if (num === 'LH54') return { x: 700, y: 270 };
+    if (num === 'LH55') return { x: 760, y: 230 }; // Exact LH55 middle row!
+    if (num === 'LH54') return { x: 690, y: 230 };
+    if (num === 'LH53') return { x: 620, y: 230 };
+    if (num === 'LH32') return { x: 550, y: 230 };
+    if (num === 'LH33') return { x: 830, y: 230 };
+
+    if (num === 'LH38') return { x: 527, y: 330 };
+    if (num === 'CL02') return { x: 620, y: 330 };
+    if (num === 'CL03') return { x: 710, y: 330 };
+    if (num === 'LH39') return { x: 810, y: 330 };
+    if (num === 'LH42') return { x: 237, y: 330 };
+    if (num === 'LH43') return { x: 90, y: 330 };
+    if (num === 'LH48') return { x: 245, y: 230 };
+    if (num === 'LH49') return { x: 100, y: 230 };
 
     // Admin Block 3rd Floor
-    if (num === 'LH40') return { x: 550, y: 360 };
-    if (num === 'LH41') return { x: 840, y: 360 };
-    if (num === 'LH44') return { x: 290, y: 360 };
-    if (num === 'LH45') return { x: 95, y: 360 };
-    if (num === 'LH34') return { x: 550, y: 270 };
+    if (num === 'LH34C') return { x: 770, y: 230 };
+    if (num === 'LH34B') return { x: 695, y: 230 };
+    if (num === 'LH34A') return { x: 625, y: 230 };
+    if (num === 'LH34') return { x: 550, y: 230 };
+    if (num === 'LH40') return { x: 512, y: 330 };
+    if (num === 'LH41') return { x: 797, y: 330 };
+    if (num === 'LH44') return { x: 252, y: 330 };
+    if (num === 'LH45') return { x: 75, y: 330 };
 
     return { x: 400, y: 250 };
   };
@@ -171,17 +181,15 @@ const DigitalTwinNavigationPage = () => {
 
     if (isAdminBlock) {
       if (activeFloorLevel === 0) {
-        return `M 430 400 L 370 400 L 370 120 L 245 120 L 245 90`;
-      }
-      if (activeFloorLevel === 1) {
-        return `M 520 310 L 520 335 L 560 335 L 560 360`;
+        return `M 387 400 L 387 110 L ${targetPos.x} 110 L ${targetPos.x} 90`;
       }
       if (activeFloorLevel === 2) {
-        return `M 520 310 L 520 335 L 560 335 L 560 360`;
+        if (['LH55', 'LH54', 'LH53', 'LH32', 'LH33'].includes(targetNum)) {
+          return `M 520 280 L 520 230 L ${targetPos.x} 230`;
+        }
+        return `M 520 280 L 520 330 L ${targetPos.x} 330`;
       }
-      if (activeFloorLevel === 3) {
-        return `M 520 310 L 520 330 L 330 330 L 330 360 L 290 360`;
-      }
+      return `M 520 280 L 520 330 L ${targetPos.x} 330`;
     }
 
     if (activeFloorLevel === 0) {
@@ -419,7 +427,7 @@ const DigitalTwinNavigationPage = () => {
             {/* Banner Header matching screenshot */}
             <div className="p-4 bg-slate-100 border-b border-gray-200 flex items-center justify-between">
               <div className="bg-white px-4 py-1.5 rounded-full border border-gray-300 text-xs font-black text-gray-900 tracking-wide uppercase shadow-sm">
-                {destinationRoom?.block?.name?.toUpperCase() || 'ADMINISTRATIVE BLOCK'} | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : activeFloorLevel === 2 ? 'SECOND FLOOR' : 'THIRD FLOOR'} | ENTRANCE → {destinationRoom?.roomNumber || 'LH51'}
+                {destinationRoom?.block?.name?.toUpperCase() || 'ADMINISTRATIVE BLOCK'} | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : activeFloorLevel === 2 ? 'SECOND FLOOR' : 'THIRD FLOOR'} | ENTRANCE → {destinationRoom?.roomNumber || 'LH55'}
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-green-100 text-green-700 rounded-lg">
                 Verified SIET Floor Map
@@ -444,7 +452,6 @@ const DigitalTwinNavigationPage = () => {
                     {/* GROUND FLOOR (LEVEL 0) */}
                     {activeFloorLevel === 0 && (
                       <g>
-                        {/* Top row */}
                         <rect x="50" y="50" width="80" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="90" y="85" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">MECH LAB</text>
 
@@ -470,7 +477,6 @@ const DigitalTwinNavigationPage = () => {
                         <rect x="650" y="50" width="215" height="75" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="757" y="92" fill="#dc2626" fontSize="13" fontWeight="900" textAnchor="middle">SEMINAR HALL-2</text>
 
-                        {/* Middle Rows Left */}
                         <rect x="50" y="170" width="110" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="105" y="205" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">EEE LAB</text>
 
@@ -484,7 +490,6 @@ const DigitalTwinNavigationPage = () => {
                         <text x="217" y="330" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">AGRI</text>
                         <text x="217" y="342" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">DEPT.</text>
 
-                        {/* Middle Rows Right */}
                         <rect x="480" y="200" width="100" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="530" y="228" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">CIVIL</text>
                         <text x="530" y="240" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">DEPT.</text>
@@ -498,7 +503,6 @@ const DigitalTwinNavigationPage = () => {
                         <rect x="480" y="310" width="385" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="672" y="345" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">OFFICE ROOM</text>
 
-                        {/* Bottom Row */}
                         <rect x="50" y="400" width="225" height="35" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="162" y="422" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">AGRI DEPARTMENT</text>
 
@@ -510,7 +514,6 @@ const DigitalTwinNavigationPage = () => {
                     {/* FIRST / SECOND / THIRD FLOOR (LEVEL 1, 2, 3) */}
                     {activeFloorLevel > 0 && (
                       <g>
-                        {/* Common Bottom Toilets */}
                         <rect x="50" y="400" width="235" height="35" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                         <text x="167" y="422" fill="#475569" fontSize="11" fontWeight="900" textAnchor="middle">BOYS TOILET</text>
 
@@ -549,6 +552,60 @@ const DigitalTwinNavigationPage = () => {
                         {/* LEVEL 2 */}
                         {activeFloorLevel === 2 && (
                           <g>
+                            {/* Top row */}
+                            <rect x="50" y="50" width="100" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="100" y="85" fill="#a855f7" fontSize="9" fontWeight="900" textAnchor="middle">ELECTRONICS LAB</text>
+
+                            <rect x="150" y="50" width="50" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="175" y="85" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">CL10</text>
+
+                            <rect x="200" y="50" width="90" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="245" y="85" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">CL09</text>
+
+                            <rect x="480" y="50" width="70" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="515" y="80" fill="#1e40af" fontSize="8" fontWeight="900" textAnchor="middle">MATHS</text>
+                            <text x="515" y="92" fill="#1e40af" fontSize="8" fontWeight="900" textAnchor="middle">DEPT</text>
+
+                            <rect x="550" y="50" width="60" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="580" y="85" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">CL13</text>
+
+                            <rect x="610" y="50" width="80" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="650" y="85" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH24</text>
+
+                            <rect x="690" y="50" width="80" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="730" y="85" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH25</text>
+
+                            <rect x="770" y="50" width="95" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="817" y="85" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH26</text>
+
+                            {/* Middle Row */}
+                            <rect x="50" y="200" width="80" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="90" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH49</text>
+
+                            <rect x="130" y="200" width="70" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="165" y="235" fill="#a855f7" fontSize="11" fontWeight="900" textAnchor="middle">CL06</text>
+
+                            <rect x="200" y="200" width="75" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="237" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH48</text>
+
+                            {/* Middle Row Right: LH32, LH53, LH54, LH55, LH33 */}
+                            <rect x="480" y="200" width="70" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="515" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH32</text>
+
+                            <rect x="550" y="200" width="70" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="585" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH53</text>
+
+                            <rect x="620" y="200" width="70" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="655" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH54</text>
+
+                            {/* EXACT POSITION FOR LH55 */}
+                            <rect x="690" y="200" width="80" height="60" fill={destinationRoom?.roomNumber === 'LH55' ? '#dbeafe' : '#ffffff'} stroke={destinationRoom?.roomNumber === 'LH55' ? '#2563eb' : '#1e293b'} strokeWidth={destinationRoom?.roomNumber === 'LH55' ? "3" : "1.5"} />
+                            <text x="730" y="235" fill="#1e40af" fontSize="12" fontWeight="900" textAnchor="middle">LH55</text>
+
+                            <rect x="770" y="200" width="95" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="817" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH33</text>
+
+                            {/* Row above Toilets */}
                             <rect x="50" y="300" width="80" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                             <text x="90" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH43</text>
 
@@ -743,7 +800,7 @@ const DigitalTwinNavigationPage = () => {
                   </g>
                 )}
 
-                {/* --- NAVIGATION PATH LINE OVERLAY matching screenshot --- */}
+                {/* --- NAVIGATION PATH LINE OVERLAY --- */}
                 <path
                   d={renderPathD()}
                   fill="none"
@@ -772,7 +829,7 @@ const DigitalTwinNavigationPage = () => {
             <div className="p-4 bg-slate-100 border-t border-gray-200 text-gray-600 text-xs flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-blue-600" />
-                <span>Path highlighted in red dashed line following {destinationRoom?.block?.name || 'Administrative Block'} corridors.</span>
+                <span>Path highlighted in red dashed line following {destinationRoom?.block?.name || 'Administrative Block'} corridors to {destinationRoom?.roomNumber}.</span>
               </div>
               <span className="text-[10px] uppercase tracking-widest font-bold text-gray-500">SIET Digital Twin Spatial Model</span>
             </div>
