@@ -120,6 +120,16 @@ const DigitalTwinNavigationPage = () => {
     if (num === 'LH15') return { x: 680, y: 110 };
     if (num === 'LH16') return { x: 650, y: 380 };
 
+    if (num === 'LH17') return { x: 145, y: 380 };
+    if (num === 'LH18') return { x: 120, y: 110 };
+    if (num === 'LH19') return { x: 235, y: 110 };
+    if (num === 'LH20') return { x: 335, y: 110 };
+    if (num === 'LH21') return { x: 435, y: 110 };
+    if (num === 'LH22') return { x: 670, y: 110 };
+    if (num === 'LH23A') return { x: 280, y: 380 };
+    if (num === 'LH23B') return { x: 390, y: 380 };
+    if (num === 'LH23') return { x: 640, y: 380 };
+
     return { x: 400, y: 250 };
   };
 
@@ -129,28 +139,27 @@ const DigitalTwinNavigationPage = () => {
     const targetPos = getRoomCenterPos(targetNum);
 
     if (activeFloorLevel === 0) {
-      // Ground floor path from Entry to target room
-      if (targetNum === 'LH01') {
-        return "M 400 400 L 400 310 L 150 310 L 150 340";
-      }
-      if (targetNum === 'LH06') {
-        return "M 400 400 L 400 310 L 650 310 L 650 340";
-      }
-      if (['LH02', 'LH03'].includes(targetNum)) {
-        return `M 400 400 L 400 310 L 150 310 L 150 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
-      }
+      if (targetNum === 'LH01') return "M 400 400 L 400 310 L 150 310 L 150 340";
+      if (targetNum === 'LH06') return "M 400 400 L 400 310 L 650 310 L 650 340";
+      if (['LH02', 'LH03'].includes(targetNum)) return `M 400 400 L 400 310 L 150 310 L 150 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
       return `M 400 400 L 400 310 L 650 310 L 650 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
+    } else if (activeFloorLevel === 3) {
+      // Third Floor path matching user screenshot (Stairs -> Left -> Up -> Left -> Target)
+      if (targetNum === 'LH19') {
+        return "M 600 250 L 530 250 L 530 215 L 340 215 L 340 160 L 235 160 L 235 120";
+      }
+      if (['LH18', 'LH20'].includes(targetNum)) {
+        return `M 600 250 L 530 250 L 530 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
+      }
+      if (['LH21', 'LH22'].includes(targetNum)) {
+        return `M 600 250 L 600 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
+      }
+      return `M 600 250 L 600 320 L ${targetPos.x} 320 L ${targetPos.x} 340`;
     } else {
-      // First / Second floor path starting from Stairs (East side, x=600, y=250) around courtyard ring to target
-      if (['LH07', 'LH13'].includes(targetNum)) {
-        return "M 600 250 L 600 320 L 150 320 L 150 340";
-      }
-      if (['LH12', 'LH16'].includes(targetNum)) {
-        return "M 600 250 L 600 320 L 650 320 L 650 340";
-      }
-      if (['LH08', 'LH09', 'LH14'].includes(targetNum)) {
-        return `M 600 250 L 600 170 L ${targetPos.x} 170 L ${targetPos.x} 120`;
-      }
+      // First / Second floor
+      if (['LH07', 'LH13'].includes(targetNum)) return "M 600 250 L 600 320 L 150 320 L 150 340";
+      if (['LH12', 'LH16'].includes(targetNum)) return "M 600 250 L 600 320 L 650 320 L 650 340";
+      if (['LH08', 'LH09', 'LH14'].includes(targetNum)) return `M 600 250 L 600 170 L ${targetPos.x} 170 L ${targetPos.x} 120`;
       return `M 600 250 L 600 170 L ${targetPos.x} 170 L ${targetPos.x} 120`;
     }
   };
@@ -349,7 +358,8 @@ const DigitalTwinNavigationPage = () => {
             {[
               { level: 0, label: 'Ground Floor' },
               { level: 1, label: 'First Floor' },
-              { level: 2, label: 'Second Floor' }
+              { level: 2, label: 'Second Floor' },
+              { level: 3, label: 'Third Floor' }
             ].map((f) => (
               <button
                 key={f.level}
@@ -371,7 +381,7 @@ const DigitalTwinNavigationPage = () => {
             {/* Academic Floor Banner Header matching screenshot */}
             <div className="p-4 bg-slate-100 border-b border-gray-200 flex items-center justify-between">
               <div className="bg-white px-4 py-1.5 rounded-full border border-gray-300 text-xs font-black text-gray-900 tracking-wide uppercase shadow-sm">
-                ACADEMIC BLOCK | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : 'SECOND FLOOR'} | ENTRANCE → {destinationRoom?.roomNumber || 'LH01'}
+                ACADEMIC BLOCK | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : activeFloorLevel === 2 ? 'SECOND FLOOR' : 'THIRD FLOOR'} | STAIRS → {destinationRoom?.roomNumber || 'LH19'}
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-green-100 text-green-700 rounded-lg">
                 Verified SIET Floor Map
@@ -390,11 +400,9 @@ const DigitalTwinNavigationPage = () => {
                 {/* Outer Building Boundary */}
                 <rect x="50" y="50" width="700" height="390" fill="#f8fafc" stroke="#334155" strokeWidth="3" />
 
-                {/* Pin Location Marker Reusable Function */}
                 {/* ---------------- GROUND FLOOR (LEVEL 0) ---------------- */}
                 {activeFloorLevel === 0 && (
                   <g>
-                    {/* Top Row: LH02, LH03, EXIT, LH04, LH05 */}
                     <g>
                       <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH02</text>
@@ -402,7 +410,6 @@ const DigitalTwinNavigationPage = () => {
                       <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH03</text>
 
-                      {/* EXIT */}
                       <rect x="330" y="60" width="140" height="40" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
                       <text x="400" y="85" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">EXIT</text>
 
@@ -413,16 +420,13 @@ const DigitalTwinNavigationPage = () => {
                       <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH05</text>
                     </g>
 
-                    {/* Middle Row: Stairs West & Stairs East */}
                     <g>
-                      {/* Stairs West */}
                       <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
                       <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
                       <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
                       <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      {/* Stairs East */}
                       <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
                       <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
@@ -430,12 +434,10 @@ const DigitalTwinNavigationPage = () => {
                       <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
                     </g>
 
-                    {/* Bottom Row: LH01, ENTRY, LH06 */}
                     <g>
                       <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH01</text>
 
-                      {/* ENTRY */}
                       <rect x="320" y="380" width="160" height="50" fill="#ffffff" stroke="#dc2626" strokeWidth="2" />
                       <text x="400" y="412" fill="#dc2626" fontSize="13" fontWeight="900" textAnchor="middle">ENTRY</text>
 
@@ -448,7 +450,6 @@ const DigitalTwinNavigationPage = () => {
                 {/* ---------------- FIRST FLOOR (LEVEL 1) ---------------- */}
                 {activeFloorLevel === 1 && (
                   <g>
-                    {/* Top Row: LH08, LH09, LH10, LH11 */}
                     <g>
                       <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH08</text>
@@ -463,7 +464,6 @@ const DigitalTwinNavigationPage = () => {
                       <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH11</text>
                     </g>
 
-                    {/* Middle Row: Stairs West, Courtyard Void, Stairs East */}
                     <g>
                       <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
@@ -471,7 +471,6 @@ const DigitalTwinNavigationPage = () => {
                       <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
                       <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      {/* Central Courtyard Void Ring */}
                       <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
 
                       <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
@@ -481,12 +480,10 @@ const DigitalTwinNavigationPage = () => {
                       <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
                     </g>
 
-                    {/* Bottom Row: LH07, Girls/Boys Toilet, LH12 */}
                     <g>
                       <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH07</text>
 
-                      {/* Toilets */}
                       <rect x="300" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                       <text x="345" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">GIRLS</text>
                       <text x="345" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
@@ -504,12 +501,10 @@ const DigitalTwinNavigationPage = () => {
                 {/* ---------------- SECOND FLOOR (LEVEL 2) ---------------- */}
                 {activeFloorLevel === 2 && (
                   <g>
-                    {/* Top Row: LH14, SEMINAR HALL - 1, LH15 */}
                     <g>
                       <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH14</text>
 
-                      {/* SEMINAR HALL - 1 */}
                       <rect x="230" y="60" width="340" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="400" y="102" fill="#dc2626" fontSize="14" fontWeight="900" textAnchor="middle">SEMINAR HALL - 1</text>
 
@@ -517,7 +512,6 @@ const DigitalTwinNavigationPage = () => {
                       <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH15</text>
                     </g>
 
-                    {/* Middle Row: Stairs West, Courtyard Void, Stairs East */}
                     <g>
                       <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
@@ -525,7 +519,6 @@ const DigitalTwinNavigationPage = () => {
                       <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
                       <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      {/* Central Courtyard Void Ring */}
                       <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
 
                       <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
@@ -535,12 +528,10 @@ const DigitalTwinNavigationPage = () => {
                       <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
                     </g>
 
-                    {/* Bottom Row: LH13, Girls/Boys Toilet, LH16 */}
                     <g>
                       <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH13</text>
 
-                      {/* Toilets */}
                       <rect x="300" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
                       <text x="345" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">GIRLS</text>
                       <text x="345" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
@@ -551,6 +542,55 @@ const DigitalTwinNavigationPage = () => {
 
                       <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
                       <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH16</text>
+                    </g>
+                  </g>
+                )}
+
+                {/* ---------------- THIRD FLOOR (LEVEL 3) ---------------- */}
+                {activeFloorLevel === 3 && (
+                  <g>
+                    {/* Top Row: LH18, LH19, LH20, LH21, LH22 */}
+                    <g>
+                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH18</text>
+
+                      <rect x="190" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="235" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH19</text>
+
+                      <rect x="290" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="335" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH20</text>
+
+                      <rect x="390" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="435" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH21</text>
+
+                      <rect x="610" y="60" width="120" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="670" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH22</text>
+                    </g>
+
+                    {/* Middle Row: Courtyard Void, Stairs East */}
+                    <g>
+                      <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+
+                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                    </g>
+
+                    {/* Bottom Row: LH17, LH23A, LH23B, LH23 */}
+                    <g>
+                      <rect x="70" y="330" width="150" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="145" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH17</text>
+
+                      <rect x="230" y="330" width="100" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="280" y="390" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH23A</text>
+
+                      <rect x="340" y="330" width="100" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="390" y="390" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH23B</text>
+
+                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH23</text>
                     </g>
                   </g>
                 )}
