@@ -31,7 +31,7 @@ const DigitalTwinNavigationPage = () => {
   const [calculating, setCalculating] = useState(false);
 
   // Navigation Parameters
-  const [startType, setStartType] = useState('Campus Entrance'); // 'Campus Entrance', 'Building Entrance', 'Custom Room'
+  const [startType, setStartType] = useState('Campus Entrance');
   const [startRoomId, setStartRoomId] = useState('');
   const [accessibleOnly, setAccessibleOnly] = useState(false);
 
@@ -59,7 +59,6 @@ const DigitalTwinNavigationPage = () => {
         setActiveFloorLevel(dest.floor.floorNumber);
       }
 
-      // Calculate path initially
       await handleCalculateRoute(dest, 'Campus Entrance', '', false);
     } catch (error) {
       console.error('Error loading destination room data', error);
@@ -98,10 +97,68 @@ const DigitalTwinNavigationPage = () => {
     }
   };
 
+  // Helper to get room location coordinates for path line drawing
+  const getRoomCenterPos = (roomNum) => {
+    const num = roomNum?.toUpperCase() || '';
+    if (num === 'LH01') return { x: 150, y: 380 };
+    if (num === 'LH02') return { x: 120, y: 110 };
+    if (num === 'LH03') return { x: 240, y: 110 };
+    if (num === 'LH04') return { x: 560, y: 110 };
+    if (num === 'LH05') return { x: 680, y: 110 };
+    if (num === 'LH06') return { x: 650, y: 380 };
+
+    if (num === 'LH07') return { x: 150, y: 380 };
+    if (num === 'LH08') return { x: 120, y: 110 };
+    if (num === 'LH09') return { x: 240, y: 110 };
+    if (num === 'LH10') return { x: 560, y: 110 };
+    if (num === 'LH11') return { x: 680, y: 110 };
+    if (num === 'LH12') return { x: 650, y: 380 };
+
+    if (num === 'LH13') return { x: 150, y: 380 };
+    if (num === 'LH14') return { x: 120, y: 110 };
+    if (num === 'SH01' || num.includes('SEMINAR')) return { x: 400, y: 110 };
+    if (num === 'LH15') return { x: 680, y: 110 };
+    if (num === 'LH16') return { x: 650, y: 380 };
+
+    return { x: 400, y: 250 };
+  };
+
+  // Generate SVG path command string for path display
+  const renderPathD = () => {
+    const targetNum = destinationRoom?.roomNumber || 'LH01';
+    const targetPos = getRoomCenterPos(targetNum);
+
+    if (activeFloorLevel === 0) {
+      // Ground floor path from Entry to target room
+      if (targetNum === 'LH01') {
+        return "M 400 400 L 400 310 L 150 310 L 150 340";
+      }
+      if (targetNum === 'LH06') {
+        return "M 400 400 L 400 310 L 650 310 L 650 340";
+      }
+      if (['LH02', 'LH03'].includes(targetNum)) {
+        return `M 400 400 L 400 310 L 150 310 L 150 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
+      }
+      return `M 400 400 L 400 310 L 650 310 L 650 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
+    } else {
+      // First / Second floor path starting from Stairs (East side, x=600, y=250) around courtyard ring to target
+      if (['LH07', 'LH13'].includes(targetNum)) {
+        return "M 600 250 L 600 320 L 150 320 L 150 340";
+      }
+      if (['LH12', 'LH16'].includes(targetNum)) {
+        return "M 600 250 L 600 320 L 650 320 L 650 340";
+      }
+      if (['LH08', 'LH09', 'LH14'].includes(targetNum)) {
+        return `M 600 250 L 600 170 L ${targetPos.x} 170 L ${targetPos.x} 120`;
+      }
+      return `M 600 250 L 600 170 L ${targetPos.x} 170 L ${targetPos.x} 120`;
+    }
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-96">
       <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
-      <p className="text-gray-500 font-medium text-sm">Initializing SIET Digital Campus Twin Navigation...</p>
+      <p className="text-gray-500 font-medium text-sm">Initializing SIET Academic Block Twin Engine...</p>
     </div>
   );
 
@@ -118,8 +175,8 @@ const DigitalTwinNavigationPage = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="bg-blue-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md">Digital Twin Engine</span>
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">A* Indoor Pathfinding</span>
+              <span className="bg-blue-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md">SIET Academic Twin</span>
+              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">A* Indoor Navigation</span>
             </div>
             <h1 className="text-2xl font-black font-display text-gray-900 tracking-tight mt-0.5">
               {destinationRoom?.roomNumber} — {destinationRoom?.name}
@@ -169,7 +226,7 @@ const DigitalTwinNavigationPage = () => {
               <label className="text-xs font-bold text-gray-700 block">Select Starting Point</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: 'Campus Entrance', label: 'Main Campus Gate' },
+                  { id: 'Campus Entrance', label: 'Main Entrance' },
                   { id: 'Building Entrance', label: 'Block Entrance' },
                   { id: 'Custom Room', label: 'Select Room' }
                 ].map((opt) => (
@@ -200,10 +257,10 @@ const DigitalTwinNavigationPage = () => {
                     }}
                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-2xl text-xs font-bold text-gray-800 focus:ring-2 focus:ring-blue-100"
                   >
-                    <option value="">Select Starting Classroom...</option>
+                    <option value="">Select Starting Room...</option>
                     {allRooms.map((r) => (
                       <option key={r._id} value={r._id}>
-                        {r.roomNumber} - {r.name} ({r.block?.code})
+                        {r.roomNumber} - {r.name}
                       </option>
                     ))}
                   </select>
@@ -217,7 +274,7 @@ const DigitalTwinNavigationPage = () => {
                 <Accessibility className="w-4 h-4 text-blue-600" />
                 <div>
                   <p className="text-xs font-bold text-gray-800">Accessible Route</p>
-                  <p className="text-[10px] text-gray-400 font-medium">Avoid stairs, prefer elevators/ramps</p>
+                  <p className="text-[10px] text-gray-400 font-medium">Avoid stairs, prefer ramps/elevators</p>
                 </div>
               </div>
               <button
@@ -288,129 +345,248 @@ const DigitalTwinNavigationPage = () => {
 
           {/* Floor Selector Tabs */}
           <div className="bg-white p-2 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-2 overflow-x-auto">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-3">Floor Level:</span>
-            {[0, 1, 2, 3].map((num) => (
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-3">Academic Floor:</span>
+            {[
+              { level: 0, label: 'Ground Floor' },
+              { level: 1, label: 'First Floor' },
+              { level: 2, label: 'Second Floor' }
+            ].map((f) => (
               <button
-                key={num}
-                onClick={() => setActiveFloorLevel(num)}
+                key={f.level}
+                onClick={() => setActiveFloorLevel(f.level)}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-                  activeFloorLevel === num
+                  activeFloorLevel === f.level
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                Level {num} {num === destinationRoom?.floor?.floorNumber && '(Target)'}
+                {f.label} {f.level === destinationRoom?.floor?.floorNumber && '(Target)'}
               </button>
             ))}
           </div>
 
           {/* Interactive Digital Twin Visual Canvas */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden min-h-[520px] relative flex flex-col">
-            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-bold text-gray-800">
-                  {destinationRoom?.block?.name} — Floor Level {activeFloorLevel} Plan
-                </span>
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden min-h-[540px] relative flex flex-col">
+
+            {/* Academic Floor Banner Header matching screenshot */}
+            <div className="p-4 bg-slate-100 border-b border-gray-200 flex items-center justify-between">
+              <div className="bg-white px-4 py-1.5 rounded-full border border-gray-300 text-xs font-black text-gray-900 tracking-wide uppercase shadow-sm">
+                ACADEMIC BLOCK | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : 'SECOND FLOOR'} | ENTRANCE → {destinationRoom?.roomNumber || 'LH01'}
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-green-100 text-green-700 rounded-lg">
-                Interactive Digital Twin
+                Verified SIET Floor Map
               </span>
             </div>
 
-            {/* SVG Interactive Floor Plan Drawing */}
-            <div className="flex-1 p-6 relative flex items-center justify-center bg-slate-950 overflow-auto">
-              <svg viewBox="0 0 800 500" className="w-full max-w-3xl h-auto rounded-2xl shadow-2xl border border-slate-800 bg-slate-900">
-                {/* Grid Background Lines */}
+            {/* SVG Canvas drawing exact layout matching screenshots */}
+            <div className="flex-1 p-6 relative flex items-center justify-center bg-slate-200 overflow-auto">
+              <svg viewBox="0 0 800 480" className="w-full max-w-3xl h-auto rounded-2xl shadow-xl border border-gray-400 bg-white">
                 <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" strokeWidth="1" />
-                  </pattern>
-                  <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+                  <marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
                   </marker>
                 </defs>
-                <rect width="800" height="500" fill="url(#grid)" />
 
-                {/* Building Outer Bounds */}
-                <rect x="40" y="40" width="720" height="420" rx="16" fill="#0f172a" stroke="#334155" strokeWidth="3" />
+                {/* Outer Building Boundary */}
+                <rect x="50" y="50" width="700" height="390" fill="#f8fafc" stroke="#334155" strokeWidth="3" />
 
-                {/* Corridor System */}
-                <rect x="80" y="220" width="640" height="60" fill="#1e293b" stroke="#475569" strokeWidth="2" strokeDasharray="4 4" />
-                <text x="400" y="255" fill="#64748b" fontSize="11" fontWeight="bold" textAnchor="middle" letterSpacing="2">MAIN WALKWAY CORRIDOR</text>
+                {/* Pin Location Marker Reusable Function */}
+                {/* ---------------- GROUND FLOOR (LEVEL 0) ---------------- */}
+                {activeFloorLevel === 0 && (
+                  <g>
+                    {/* Top Row: LH02, LH03, EXIT, LH04, LH05 */}
+                    <g>
+                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH02</text>
 
-                {/* Rooms Grid Layout */}
-                {/* Room Left: G101 / Reception */}
-                <g>
-                  <rect x="80" y="80" width="160" height="120" rx="8" fill="#1e293b" stroke="#475569" strokeWidth="2" />
-                  <text x="160" y="135" fill="#94a3b8" fontSize="12" fontWeight="bold" textAnchor="middle">Reception / Office</text>
-                  <text x="160" y="155" fill="#64748b" fontSize="10" textAnchor="middle">G101</text>
-                </g>
+                      <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH03</text>
 
-                {/* Room Center: F101 */}
-                <g>
-                  <rect x="280" y="80" width="180" height="120" rx="8" fill="#1e293b" stroke="#475569" strokeWidth="2" />
-                  <text x="370" y="135" fill="#94a3b8" fontSize="12" fontWeight="bold" textAnchor="middle">Lecture Hall A</text>
-                  <text x="370" y="155" fill="#64748b" fontSize="10" textAnchor="middle">F101</text>
-                </g>
+                      {/* EXIT */}
+                      <rect x="330" y="60" width="140" height="40" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
+                      <text x="400" y="85" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">EXIT</text>
 
-                {/* Room Target: F105 (Highlighted if target) */}
-                <g>
-                  <rect
-                    x="500" y="80" width="220" height="120" rx="8"
-                    fill={destinationRoom?.roomNumber === 'F105' ? '#1e3a8a' : '#1e293b'}
-                    stroke={destinationRoom?.roomNumber === 'F105' ? '#3b82f6' : '#475569'}
-                    strokeWidth="3"
-                    className={destinationRoom?.roomNumber === 'F105' ? 'animate-pulse' : ''}
-                  />
-                  <text x="610" y="130" fill="#ffffff" fontSize="13" fontWeight="bold" textAnchor="middle">
-                    {destinationRoom?.name || 'Programming Lab'}
-                  </text>
-                  <text x="610" y="150" fill="#60a5fa" fontSize="11" fontWeight="bold" textAnchor="middle">
-                    {destinationRoom?.roomNumber || 'F105'} (Target)
-                  </text>
+                      <rect x="510" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="560" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH04</text>
 
-                  {/* Room Door Entrance */}
-                  <rect x="580" y="195" width="40" height="10" fill="#3b82f6" rx="2" />
-                  <text x="600" y="215" fill="#93c5fd" fontSize="9" textAnchor="middle">Door Entrance</text>
-                </g>
+                      <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH05</text>
+                    </g>
 
-                {/* Stairs / Elevator Area */}
-                <g>
-                  <rect x="80" y="310" width="140" height="120" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
-                  <text x="150" y="365" fill="#fbbf24" fontSize="12" fontWeight="bold" textAnchor="middle">Stairwell A / Lift</text>
-                  <text x="150" y="385" fill="#d97706" fontSize="10" textAnchor="middle">Floor Transition</text>
-                </g>
+                    {/* Middle Row: Stairs West & Stairs East */}
+                    <g>
+                      {/* Stairs West */}
+                      <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                {/* A* PATH OVERLAY LINE */}
+                      {/* Stairs East */}
+                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                    </g>
+
+                    {/* Bottom Row: LH01, ENTRY, LH06 */}
+                    <g>
+                      <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH01</text>
+
+                      {/* ENTRY */}
+                      <rect x="320" y="380" width="160" height="50" fill="#ffffff" stroke="#dc2626" strokeWidth="2" />
+                      <text x="400" y="412" fill="#dc2626" fontSize="13" fontWeight="900" textAnchor="middle">ENTRY</text>
+
+                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH06</text>
+                    </g>
+                  </g>
+                )}
+
+                {/* ---------------- FIRST FLOOR (LEVEL 1) ---------------- */}
+                {activeFloorLevel === 1 && (
+                  <g>
+                    {/* Top Row: LH08, LH09, LH10, LH11 */}
+                    <g>
+                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH08</text>
+
+                      <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH09</text>
+
+                      <rect x="510" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="560" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH10</text>
+
+                      <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH11</text>
+                    </g>
+
+                    {/* Middle Row: Stairs West, Courtyard Void, Stairs East */}
+                    <g>
+                      <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+
+                      {/* Central Courtyard Void Ring */}
+                      <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+
+                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                    </g>
+
+                    {/* Bottom Row: LH07, Girls/Boys Toilet, LH12 */}
+                    <g>
+                      <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH07</text>
+
+                      {/* Toilets */}
+                      <rect x="300" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                      <text x="345" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">GIRLS</text>
+                      <text x="345" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+
+                      <rect x="410" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                      <text x="455" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">BOYS</text>
+                      <text x="455" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+
+                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH12</text>
+                    </g>
+                  </g>
+                )}
+
+                {/* ---------------- SECOND FLOOR (LEVEL 2) ---------------- */}
+                {activeFloorLevel === 2 && (
+                  <g>
+                    {/* Top Row: LH14, SEMINAR HALL - 1, LH15 */}
+                    <g>
+                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH14</text>
+
+                      {/* SEMINAR HALL - 1 */}
+                      <rect x="230" y="60" width="340" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="400" y="102" fill="#dc2626" fontSize="14" fontWeight="900" textAnchor="middle">SEMINAR HALL - 1</text>
+
+                      <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH15</text>
+                    </g>
+
+                    {/* Middle Row: Stairs West, Courtyard Void, Stairs East */}
+                    <g>
+                      <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+
+                      {/* Central Courtyard Void Ring */}
+                      <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+
+                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
+                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
+                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                    </g>
+
+                    {/* Bottom Row: LH13, Girls/Boys Toilet, LH16 */}
+                    <g>
+                      <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH13</text>
+
+                      {/* Toilets */}
+                      <rect x="300" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                      <text x="345" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">GIRLS</text>
+                      <text x="345" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+
+                      <rect x="410" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                      <text x="455" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">BOYS</text>
+                      <text x="455" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+
+                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH16</text>
+                    </g>
+                  </g>
+                )}
+
+                {/* --- NAVIGATION PATH LINE OVERLAY matching screenshot --- */}
                 <path
-                  d="M 150 350 L 150 250 L 600 250 L 600 195"
+                  d={renderPathD()}
                   fill="none"
-                  stroke="#3b82f6"
+                  stroke="#dc2626"
                   strokeWidth="5"
-                  strokeDasharray="8 4"
-                  markerEnd="url(#arrow)"
+                  strokeDasharray="8 6"
+                  markerEnd="url(#arrowRed)"
                 />
 
-                {/* Path Animation Markers */}
-                <circle cx="150" cy="350" r="8" fill="#22c55e" stroke="#ffffff" strokeWidth="2" />
-                <text x="150" y="380" fill="#4ade80" fontSize="10" fontWeight="bold" textAnchor="middle">START</text>
+                {/* Target Room Blue Location Drop Pin */}
+                {(() => {
+                  const pos = getRoomCenterPos(destinationRoom?.roomNumber);
+                  return (
+                    <g transform={`translate(${pos.x}, ${pos.y - 20})`}>
+                      <circle cx="0" cy="0" r="12" fill="#2563eb" stroke="#ffffff" strokeWidth="2" className="animate-bounce" />
+                      <circle cx="0" cy="0" r="4" fill="#ffffff" />
+                      <path d="M -12 0 L 0 16 L 12 0 Z" fill="#2563eb" />
+                    </g>
+                  );
+                })()}
 
-                <circle cx="150" cy="250" r="6" fill="#3b82f6" />
-                <circle cx="350" cy="250" r="6" fill="#3b82f6" />
-
-                <circle cx="600" cy="195" r="8" fill="#ef4444" stroke="#ffffff" strokeWidth="2" />
-                <text x="600" y="175" fill="#f87171" fontSize="10" fontWeight="bold" textAnchor="middle">DESTINATION</text>
               </svg>
             </div>
 
             {/* Bottom Status Ribbon */}
-            <div className="p-4 bg-slate-900 border-t border-slate-800 text-slate-400 text-xs flex items-center justify-between">
+            <div className="p-4 bg-slate-100 border-t border-gray-200 text-gray-600 text-xs flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-blue-400" />
-                <span>Follow the blue dashed line through the corridor to reach room entrance door.</span>
+                <Info className="w-4 h-4 text-blue-600" />
+                <span>Path highlighted in red dashed line following Academic Block corridors.</span>
               </div>
-              <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500">SIET Digital Twin Spatial Model</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-gray-500">SIET Digital Twin Spatial Model</span>
             </div>
           </div>
         </div>

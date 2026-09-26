@@ -111,39 +111,15 @@ const seedData = async () => {
     });
 
     console.log('Seeding SIET blocks...');
-    const blockCSE = await Block.create({
-      name: 'CSE & IT Academic Block',
-      code: 'CSEB',
-      buildingType: 'Academic',
-      floorsCount: 4,
-      description: 'Housing Computer Science, AI&DS, and Information Technology classrooms & laboratories.',
-      location: 'North Campus Quadrangle',
-      departments: [deptCSE._id, deptAIDS._id],
-      facilities: ['High-speed WiFi', 'AC Computer Labs', 'Seminar Hall', 'Elevators'],
-      status: 'Active'
-    });
-
-    const blockECE = await Block.create({
-      name: 'ECE & EEE Academic Block',
-      code: 'ECEB',
+    const blockAcademic = await Block.create({
+      name: 'Academic Block',
+      code: 'ACAB',
       buildingType: 'Academic',
       floorsCount: 3,
-      description: 'Housing Electronics, Electrical, and IoT research labs.',
-      location: 'East Wing',
-      departments: [deptECE._id],
-      facilities: ['Embedded Systems Lab', 'Smart Classrooms', 'Power Backup'],
-      status: 'Active'
-    });
-
-    const blockMech = await Block.create({
-      name: 'Mechanical & Civil Block',
-      code: 'MECHB',
-      buildingType: 'Academic',
-      floorsCount: 3,
-      description: 'Advanced manufacturing, robotics, and civil material testing laboratories.',
-      location: 'West Campus Wing',
-      departments: [deptMech._id],
-      facilities: ['Heavy Machinery Workshop', 'CAD/CAM Lab'],
+      description: 'Main Academic Block featuring Lecture Halls (LH01 - LH16), Seminar Hall 1, and Central Quadrangle.',
+      location: 'Central Campus Quadrangle',
+      departments: [deptCSE._id, deptAIDS._id, deptECE._id, deptMech._id],
+      facilities: ['High-speed WiFi', 'Smart Lecture Halls', 'Staircases', 'Restrooms'],
       status: 'Active'
     });
 
@@ -158,27 +134,27 @@ const seedData = async () => {
       status: 'Active'
     });
 
-    console.log('Seeding floors...');
-    const floorCSEG = await Floor.create({
+    console.log('Seeding Academic Block floors...');
+    const floorG = await Floor.create({
       name: 'Ground Floor',
       floorNumber: 0,
-      block: blockCSE._id,
+      block: blockAcademic._id,
       isPublished: true,
       status: 'Published'
     });
 
-    const floorCSE1 = await Floor.create({
+    const floor1 = await Floor.create({
       name: 'First Floor',
       floorNumber: 1,
-      block: blockCSE._id,
+      block: blockAcademic._id,
       isPublished: true,
       status: 'Published'
     });
 
-    const floorCSE2 = await Floor.create({
+    const floor2 = await Floor.create({
       name: 'Second Floor',
       floorNumber: 2,
-      block: blockCSE._id,
+      block: blockAcademic._id,
       isPublished: true,
       status: 'Published'
     });
@@ -191,220 +167,640 @@ const seedData = async () => {
       status: 'Published'
     });
 
-    const floorMechG = await Floor.create({
-      name: 'Ground Floor',
-      floorNumber: 0,
-      block: blockMech._id,
-      isPublished: true,
-      status: 'Published'
-    });
-
     console.log('Seeding navigation nodes...');
-    const nodeGate = await NavigationNode.create({
-      nodeId: 'NODE_MAIN_GATE',
-      block: blockAdmin._id,
-      floor: floorAdminG._id,
+    // --- GROUND FLOOR NODES ---
+    const nodeEntry = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_G_ENTRY',
+      block: blockAcademic._id,
+      floor: floorG._id,
       floorNumber: 0,
-      x: 50,
-      y: 350,
-      nodeType: 'Campus Entrance',
-      label: 'Main Gate Entrance'
-    });
-
-    const nodeCSEEnt = await NavigationNode.create({
-      nodeId: 'NODE_CSE_ENTRANCE',
-      block: blockCSE._id,
-      floor: floorCSEG._id,
-      floorNumber: 0,
-      x: 150,
-      y: 350,
+      x: 400,
+      y: 440,
       nodeType: 'Building Entrance',
-      label: 'CSE Block Entrance'
+      label: 'Academic Block Main Entry'
     });
 
-    const nodeCSECorridorG = await NavigationNode.create({
-      nodeId: 'NODE_CSE_G_CORRIDOR_1',
-      block: blockCSE._id,
-      floor: floorCSEG._id,
+    const nodeExit = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_G_EXIT',
+      block: blockAcademic._id,
+      floor: floorG._id,
       floorNumber: 0,
-      x: 250,
-      y: 350,
-      nodeType: 'Corridor',
-      label: 'Ground Floor Main Corridor'
+      x: 400,
+      y: 60,
+      nodeType: 'Exit',
+      label: 'Academic Block Back Exit'
     });
 
-    const nodeCSEStairG = await NavigationNode.create({
-      nodeId: 'NODE_CSE_STAIR_A_G',
-      block: blockCSE._id,
-      floor: floorCSEG._id,
+    const nodeStairsWestG = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_G_STAIRS_WEST',
+      block: blockAcademic._id,
+      floor: floorG._id,
       floorNumber: 0,
-      x: 350,
-      y: 350,
+      x: 220,
+      y: 250,
       nodeType: 'Stair',
-      label: 'Stairwell A (Ground Floor)'
+      label: 'West Stairs (Ground Floor)'
     });
 
-    const nodeCSEStair1 = await NavigationNode.create({
-      nodeId: 'NODE_CSE_STAIR_A_1',
-      block: blockCSE._id,
-      floor: floorCSE1._id,
-      floorNumber: 1,
-      x: 350,
-      y: 200,
+    const nodeStairsEastG = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_G_STAIRS_EAST',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 580,
+      y: 250,
       nodeType: 'Stair',
-      label: 'Stairwell A (First Floor)'
+      label: 'East Stairs (Ground Floor)'
     });
 
-    const nodeCSECorridor1 = await NavigationNode.create({
-      nodeId: 'NODE_CSE_1_CORRIDOR_1',
-      block: blockCSE._id,
-      floor: floorCSE1._id,
-      floorNumber: 1,
-      x: 450,
-      y: 200,
+    // Ground Floor Corridor Ring
+    const nodeG_Corr_Bottom = await NavigationNode.create({
+      nodeId: 'NODE_G_CORR_BOTTOM',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 400,
+      y: 380,
       nodeType: 'Corridor',
-      label: 'First Floor Main Corridor'
+      label: 'Ground Floor Entrance Lobby'
     });
 
-    const nodeF105Ent = await NavigationNode.create({
-      nodeId: 'NODE_F105_ENTRANCE',
-      block: blockCSE._id,
-      floor: floorCSE1._id,
-      floorNumber: 1,
-      x: 550,
-      y: 180,
+    const nodeG_LH01_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH01_ENT',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 220,
+      y: 380,
       nodeType: 'Room Entrance',
-      label: 'F105 Door Entrance'
+      label: 'LH01 Entrance'
     });
+
+    const nodeG_LH06_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH06_ENT',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 580,
+      y: 380,
+      nodeType: 'Room Entrance',
+      label: 'LH06 Entrance'
+    });
+
+    const nodeG_LH02_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH02_ENT',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 160,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH02 Entrance'
+    });
+
+    const nodeG_LH03_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH03_ENT',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 280,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH03 Entrance'
+    });
+
+    const nodeG_LH04_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH04_ENT',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 520,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH04 Entrance'
+    });
+
+    const nodeG_LH05_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH05_ENT',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      floorNumber: 0,
+      x: 640,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH05 Entrance'
+    });
+
+    // --- FIRST FLOOR NODES ---
+    const nodeStairsWest1 = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_1_STAIRS_WEST',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 220,
+      y: 250,
+      nodeType: 'Stair',
+      label: 'West Stairs (First Floor)'
+    });
+
+    const nodeStairsEast1 = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_1_STAIRS_EAST',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 580,
+      y: 250,
+      nodeType: 'Stair',
+      label: 'East Stairs (First Floor)'
+    });
+
+    const node1_LH07_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH07_ENT',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 220,
+      y: 380,
+      nodeType: 'Room Entrance',
+      label: 'LH07 Entrance'
+    });
+
+    const node1_LH12_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH12_ENT',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 580,
+      y: 380,
+      nodeType: 'Room Entrance',
+      label: 'LH12 Entrance'
+    });
+
+    const node1_LH08_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH08_ENT',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 160,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH08 Entrance'
+    });
+
+    const node1_LH09_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH09_ENT',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 280,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH09 Entrance'
+    });
+
+    const node1_LH10_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH10_ENT',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 520,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH10 Entrance'
+    });
+
+    const node1_LH11_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH11_ENT',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      floorNumber: 1,
+      x: 640,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH11 Entrance'
+    });
+
+    // --- SECOND FLOOR NODES ---
+    const nodeStairsWest2 = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_2_STAIRS_WEST',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 220,
+      y: 250,
+      nodeType: 'Stair',
+      label: 'West Stairs (Second Floor)'
+    });
+
+    const nodeStairsEast2 = await NavigationNode.create({
+      nodeId: 'NODE_ACAB_2_STAIRS_EAST',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 580,
+      y: 250,
+      nodeType: 'Stair',
+      label: 'East Stairs (Second Floor)'
+    });
+
+    const node2_LH13_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH13_ENT',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 220,
+      y: 380,
+      nodeType: 'Room Entrance',
+      label: 'LH13 Entrance'
+    });
+
+    const node2_LH16_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH16_ENT',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 580,
+      y: 380,
+      nodeType: 'Room Entrance',
+      label: 'LH16 Entrance'
+    });
+
+    const node2_LH14_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH14_ENT',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 160,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH14 Entrance'
+    });
+
+    const node2_SemHall1_Ent = await NavigationNode.create({
+      nodeId: 'NODE_SEM1_ENT',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 400,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'Seminar Hall 1 Entrance'
+    });
+
+    const node2_LH15_Ent = await NavigationNode.create({
+      nodeId: 'NODE_LH15_ENT',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      floorNumber: 2,
+      x: 640,
+      y: 120,
+      nodeType: 'Room Entrance',
+      label: 'LH15 Entrance'
+    });
+
 
     console.log('Seeding navigation edges...');
     await NavigationEdge.create([
-      {
-        edgeId: 'EDGE_GATE_TO_CSE',
-        fromNode: nodeGate.nodeId,
-        toNode: nodeCSEEnt.nodeId,
-        distanceMeters: 30,
-        walkingTimeSeconds: 25,
-        edgeType: 'Walkway'
-      },
-      {
-        edgeId: 'EDGE_CSE_ENT_TO_CORR_G',
-        fromNode: nodeCSEEnt.nodeId,
-        toNode: nodeCSECorridorG.nodeId,
-        distanceMeters: 15,
-        walkingTimeSeconds: 12,
-        edgeType: 'Corridor'
-      },
-      {
-        edgeId: 'EDGE_CORR_G_TO_STAIR_G',
-        fromNode: nodeCSECorridorG.nodeId,
-        toNode: nodeCSEStairG.nodeId,
-        distanceMeters: 20,
-        walkingTimeSeconds: 15,
-        edgeType: 'Corridor'
-      },
-      {
-        edgeId: 'EDGE_STAIR_G_TO_1',
-        fromNode: nodeCSEStairG.nodeId,
-        toNode: nodeCSEStair1.nodeId,
-        distanceMeters: 15,
-        walkingTimeSeconds: 20,
-        edgeType: 'Stair',
-        floorTransition: true
-      },
-      {
-        edgeId: 'EDGE_STAIR1_TO_CORR1',
-        fromNode: nodeCSEStair1.nodeId,
-        toNode: nodeCSECorridor1.nodeId,
-        distanceMeters: 15,
-        walkingTimeSeconds: 12,
-        edgeType: 'Corridor'
-      },
-      {
-        edgeId: 'EDGE_CORR1_TO_F105',
-        fromNode: nodeCSECorridor1.nodeId,
-        toNode: nodeF105Ent.nodeId,
-        distanceMeters: 10,
-        walkingTimeSeconds: 8,
-        edgeType: 'Door'
-      }
+      // Ground floor connections
+      { edgeId: 'E_G_1', fromNode: nodeEntry.nodeId, toNode: nodeG_Corr_Bottom.nodeId, distanceMeters: 10, walkingTimeSeconds: 8, edgeType: 'Corridor' },
+      { edgeId: 'E_G_2', fromNode: nodeG_Corr_Bottom.nodeId, toNode: nodeG_LH01_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_G_3', fromNode: nodeG_Corr_Bottom.nodeId, toNode: nodeG_LH06_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_G_4', fromNode: nodeG_LH01_Ent.nodeId, toNode: nodeStairsWestG.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_G_5', fromNode: nodeG_LH06_Ent.nodeId, toNode: nodeStairsEastG.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_G_6', fromNode: nodeStairsWestG.nodeId, toNode: nodeG_LH02_Ent.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
+      { edgeId: 'E_G_7', fromNode: nodeG_LH02_Ent.nodeId, toNode: nodeG_LH03_Ent.nodeId, distanceMeters: 12, walkingTimeSeconds: 10, edgeType: 'Corridor' },
+      { edgeId: 'E_G_8', fromNode: nodeG_LH03_Ent.nodeId, toNode: nodeExit.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_G_9', fromNode: nodeExit.nodeId, toNode: nodeG_LH04_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_G_10', fromNode: nodeG_LH04_Ent.nodeId, toNode: nodeG_LH05_Ent.nodeId, distanceMeters: 12, walkingTimeSeconds: 10, edgeType: 'Corridor' },
+      { edgeId: 'E_G_11', fromNode: nodeG_LH05_Ent.nodeId, toNode: nodeStairsEastG.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
+
+      // Stairs transitions between floors
+      { edgeId: 'E_STAIR_W_0_1', fromNode: nodeStairsWestG.nodeId, toNode: nodeStairsWest1.nodeId, distanceMeters: 15, walkingTimeSeconds: 20, edgeType: 'Stair', floorTransition: true },
+      { edgeId: 'E_STAIR_E_0_1', fromNode: nodeStairsEastG.nodeId, toNode: nodeStairsEast1.nodeId, distanceMeters: 15, walkingTimeSeconds: 20, edgeType: 'Stair', floorTransition: true },
+      { edgeId: 'E_STAIR_W_1_2', fromNode: nodeStairsWest1.nodeId, toNode: nodeStairsWest2.nodeId, distanceMeters: 15, walkingTimeSeconds: 20, edgeType: 'Stair', floorTransition: true },
+      { edgeId: 'E_STAIR_E_1_2', fromNode: nodeStairsEast1.nodeId, toNode: nodeStairsEast2.nodeId, distanceMeters: 15, walkingTimeSeconds: 20, edgeType: 'Stair', floorTransition: true },
+
+      // First floor connections
+      { edgeId: 'E_1_1', fromNode: nodeStairsWest1.nodeId, toNode: node1_LH07_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_1_2', fromNode: nodeStairsEast1.nodeId, toNode: node1_LH12_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_1_3', fromNode: nodeStairsWest1.nodeId, toNode: node1_LH08_Ent.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
+      { edgeId: 'E_1_4', fromNode: node1_LH08_Ent.nodeId, toNode: node1_LH09_Ent.nodeId, distanceMeters: 12, walkingTimeSeconds: 10, edgeType: 'Corridor' },
+      { edgeId: 'E_1_5', fromNode: node1_LH09_Ent.nodeId, toNode: node1_LH10_Ent.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
+      { edgeId: 'E_1_6', fromNode: node1_LH10_Ent.nodeId, toNode: node1_LH11_Ent.nodeId, distanceMeters: 12, walkingTimeSeconds: 10, edgeType: 'Corridor' },
+      { edgeId: 'E_1_7', fromNode: node1_LH11_Ent.nodeId, toNode: nodeStairsEast1.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
+
+      // Second floor connections
+      { edgeId: 'E_2_1', fromNode: nodeStairsWest2.nodeId, toNode: node2_LH13_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_2_2', fromNode: nodeStairsEast2.nodeId, toNode: node2_LH16_Ent.nodeId, distanceMeters: 15, walkingTimeSeconds: 12, edgeType: 'Corridor' },
+      { edgeId: 'E_2_3', fromNode: nodeStairsWest2.nodeId, toNode: node2_LH14_Ent.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
+      { edgeId: 'E_2_4', fromNode: node2_LH14_Ent.nodeId, toNode: node2_SemHall1_Ent.nodeId, distanceMeters: 18, walkingTimeSeconds: 14, edgeType: 'Corridor' },
+      { edgeId: 'E_2_5', fromNode: node2_SemHall1_Ent.nodeId, toNode: node2_LH15_Ent.nodeId, distanceMeters: 18, walkingTimeSeconds: 14, edgeType: 'Corridor' },
+      { edgeId: 'E_2_6', fromNode: node2_LH15_Ent.nodeId, toNode: nodeStairsEast2.nodeId, distanceMeters: 20, walkingTimeSeconds: 15, edgeType: 'Corridor' },
     ]);
 
-    console.log('Seeding classrooms & laboratories...');
-    const roomF105 = await Room.create({
-      roomNumber: 'F105',
-      name: 'Programming Laboratory',
-      roomType: 'Computer Lab',
-      block: blockCSE._id,
-      floor: floorCSE1._id,
-      department: deptCSE._id,
-      capacity: 60,
-      facilities: { wifi: true, projector: true, airConditioning: true, computers: true, powerBackup: true },
-      status: 'Available',
-      assignedStaff: 'Dr. R. Meenakshi',
-      purpose: 'Hands-on programming practice for Python, Java, and Data Structures.',
-      digitalTwinMapped: true,
-      geometry: { x: 500, y: 100, width: 120, height: 100 },
-      entrance: { x: 550, y: 180, doorName: 'F105 Main Door' },
-      navigationNodeId: nodeF105Ent.nodeId
-    });
+    console.log('Seeding classrooms & laboratories for Academic Block...');
 
-    const roomF101 = await Room.create({
-      roomNumber: 'F101',
-      name: 'CSE Theory Lecture Hall A',
+    // --- GROUND FLOOR ROOMS ---
+    const roomLH01 = await Room.create({
+      roomNumber: 'LH01',
+      name: 'Lecture Hall 01',
       roomType: 'Classroom',
-      block: blockCSE._id,
-      floor: floorCSE1._id,
+      block: blockAcademic._id,
+      floor: floorG._id,
       department: deptCSE._id,
       capacity: 65,
-      facilities: { wifi: true, projector: true, smartBoard: true, fans: true },
+      facilities: { wifi: true, projector: true, smartBoard: true },
       status: 'Available',
-      assignedStaff: 'Prof. S. Suresh',
-      purpose: 'Interactive theory lectures for Computer Science curriculum.',
+      purpose: 'Core Academic Lecture Hall',
       digitalTwinMapped: true,
-      geometry: { x: 350, y: 100, width: 120, height: 100 },
-      entrance: { x: 400, y: 180, doorName: 'F101 Door' }
+      navigationNodeId: nodeG_LH01_Ent.nodeId
     });
 
-    const roomAI102 = await Room.create({
-      roomNumber: 'AI102',
-      name: 'AI & Data Science Innovation Center',
-      roomType: 'Laboratory',
-      block: blockCSE._id,
-      floor: floorCSE2._id,
-      department: deptAIDS._id,
-      capacity: 50,
-      facilities: { wifi: true, projector: true, airConditioning: true, computers: true, labEquipment: true },
+    const roomLH02 = await Room.create({
+      roomNumber: 'LH02',
+      name: 'Lecture Hall 02',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      department: deptCSE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
       status: 'Available',
-      assignedStaff: 'Dr. S. Priya',
-      purpose: 'High-performance GPU computing for deep learning and data analytics.'
+      digitalTwinMapped: true,
+      navigationNodeId: nodeG_LH02_Ent.nodeId
     });
 
-    const roomG101 = await Room.create({
+    const roomLH03 = await Room.create({
+      roomNumber: 'LH03',
+      name: 'Lecture Hall 03',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      department: deptAIDS._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: nodeG_LH03_Ent.nodeId
+    });
+
+    const roomLH04 = await Room.create({
+      roomNumber: 'LH04',
+      name: 'Lecture Hall 04',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      department: deptAIDS._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: nodeG_LH04_Ent.nodeId
+    });
+
+    const roomLH05 = await Room.create({
+      roomNumber: 'LH05',
+      name: 'Lecture Hall 05',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      department: deptECE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: nodeG_LH05_Ent.nodeId
+    });
+
+    const roomLH06 = await Room.create({
+      roomNumber: 'LH06',
+      name: 'Lecture Hall 06',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floorG._id,
+      department: deptECE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: nodeG_LH06_Ent.nodeId
+    });
+
+
+    // --- FIRST FLOOR ROOMS ---
+    const roomLH07 = await Room.create({
+      roomNumber: 'LH07',
+      name: 'Lecture Hall 07',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      department: deptCSE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node1_LH07_Ent.nodeId
+    });
+
+    const roomLH08 = await Room.create({
+      roomNumber: 'LH08',
+      name: 'Lecture Hall 08',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      department: deptCSE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node1_LH08_Ent.nodeId
+    });
+
+    const roomLH09 = await Room.create({
+      roomNumber: 'LH09',
+      name: 'Lecture Hall 09',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      department: deptAIDS._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node1_LH09_Ent.nodeId
+    });
+
+    const roomLH10 = await Room.create({
+      roomNumber: 'LH10',
+      name: 'Lecture Hall 10',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      department: deptAIDS._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node1_LH10_Ent.nodeId
+    });
+
+    const roomLH11 = await Room.create({
+      roomNumber: 'LH11',
+      name: 'Lecture Hall 11',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      department: deptECE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node1_LH11_Ent.nodeId
+    });
+
+    const roomLH12 = await Room.create({
+      roomNumber: 'LH12',
+      name: 'Lecture Hall 12',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      department: deptECE._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node1_LH12_Ent.nodeId
+    });
+
+    const roomGirlsToilet1 = await Room.create({
+      roomNumber: 'GT01',
+      name: 'Girls Toilet (1st Floor)',
+      roomType: 'Other',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      capacity: 10,
+      facilities: {},
+      status: 'Available',
+      digitalTwinMapped: true
+    });
+
+    const roomBoysToilet1 = await Room.create({
+      roomNumber: 'BT01',
+      name: 'Boys Toilet (1st Floor)',
+      roomType: 'Other',
+      block: blockAcademic._id,
+      floor: floor1._id,
+      capacity: 10,
+      facilities: {},
+      status: 'Available',
+      digitalTwinMapped: true
+    });
+
+
+    // --- SECOND FLOOR ROOMS ---
+    const roomLH13 = await Room.create({
+      roomNumber: 'LH13',
+      name: 'Lecture Hall 13',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      department: deptMech._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node2_LH13_Ent.nodeId
+    });
+
+    const roomLH14 = await Room.create({
+      roomNumber: 'LH14',
+      name: 'Lecture Hall 14',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      department: deptMech._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node2_LH14_Ent.nodeId
+    });
+
+    const roomSemHall1 = await Room.create({
+      roomNumber: 'SH01',
+      name: 'Seminar Hall 1',
+      roomType: 'Seminar Hall',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      department: deptCSE._id,
+      capacity: 180,
+      facilities: { wifi: true, projector: true, airConditioning: true, audioSystem: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node2_SemHall1_Ent.nodeId
+    });
+
+    const roomLH15 = await Room.create({
+      roomNumber: 'LH15',
+      name: 'Lecture Hall 15',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      department: deptMech._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node2_LH15_Ent.nodeId
+    });
+
+    const roomLH16 = await Room.create({
+      roomNumber: 'LH16',
+      name: 'Lecture Hall 16',
+      roomType: 'Classroom',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      department: deptMech._id,
+      capacity: 65,
+      facilities: { wifi: true, projector: true },
+      status: 'Available',
+      digitalTwinMapped: true,
+      navigationNodeId: node2_LH16_Ent.nodeId
+    });
+
+    const roomGirlsToilet2 = await Room.create({
+      roomNumber: 'GT02',
+      name: 'Girls Toilet (2nd Floor)',
+      roomType: 'Other',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      capacity: 10,
+      facilities: {},
+      status: 'Available',
+      digitalTwinMapped: true
+    });
+
+    const roomBoysToilet2 = await Room.create({
+      roomNumber: 'BT02',
+      name: 'Boys Toilet (2nd Floor)',
+      roomType: 'Other',
+      block: blockAcademic._id,
+      floor: floor2._id,
+      capacity: 10,
+      facilities: {},
+      status: 'Available',
+      digitalTwinMapped: true
+    });
+
+    const roomAdminRec = await Room.create({
       roomNumber: 'G101',
-      name: 'SIET Campus Central Reception',
+      name: 'SIET Central Admin Reception',
       roomType: 'Office',
       block: blockAdmin._id,
       floor: floorAdminG._id,
-      capacity: 15,
+      capacity: 20,
       facilities: { wifi: true, airConditioning: true },
-      status: 'Available',
-      assignedStaff: 'Ms. K. Kavitha',
-      purpose: 'Information desk and visitor assistance.'
-    });
-
-    const roomM001 = await Room.create({
-      roomNumber: 'M001',
-      name: 'CAD/CAM & Automotive Workshop',
-      roomType: 'Workshop',
-      block: blockMech._id,
-      floor: floorMechG._id,
-      department: deptMech._id,
-      capacity: 40,
-      facilities: { labEquipment: true, powerBackup: true },
-      status: 'Occupied',
-      assignedStaff: 'Dr. S. Karthikeyan',
-      purpose: 'Design and fabrication of mechanical prototypes.'
+      status: 'Available'
     });
 
     console.log('Seeding faculty...');
@@ -416,7 +812,7 @@ const seedData = async () => {
         designation: 'Professor & Head',
         email: 'meenakshi.r@sreeshakthi.edu.in',
         phone: '+91 98422 11223',
-        officeRoom: roomF105._id,
+        officeRoom: roomLH01._id,
         subjects: ['Data Structures', 'Database Systems']
       },
       {
@@ -426,35 +822,12 @@ const seedData = async () => {
         designation: 'Associate Professor',
         email: 'priya.s@sreeshakthi.edu.in',
         phone: '+91 98422 33445',
-        officeRoom: roomAI102._id,
+        officeRoom: roomLH03._id,
         subjects: ['Artificial Intelligence', 'Machine Learning']
       }
     ]);
 
-    console.log('Seeding campus assets...');
-    await Asset.create([
-      {
-        assetId: 'AST_PROJ_F105',
-        name: 'Epson High-Lumen Projector',
-        assetType: 'Projector',
-        block: blockCSE._id,
-        floor: floorCSE1._id,
-        room: roomF105._id,
-        status: 'Functional',
-        notes: 'Calibrated Jan 2026'
-      },
-      {
-        assetId: 'AST_AC_F105',
-        name: 'Daikin 2-Ton Inverter AC',
-        assetType: 'AC',
-        block: blockCSE._id,
-        floor: floorCSE1._id,
-        room: roomF105._id,
-        status: 'Functional'
-      }
-    ]);
-
-    console.log('Database seeded successfully for SIET Digital Twin!');
+    console.log('Database seeded successfully for Academic Block Digital Twin!');
     process.exit();
   } catch (error) {
     console.error(`Error seeding database: ${error.message}`);
