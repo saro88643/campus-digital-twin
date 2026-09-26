@@ -97,9 +97,13 @@ const DigitalTwinNavigationPage = () => {
     }
   };
 
+  const isAdminBlock = destinationRoom?.block?.code === 'ADMB' || destinationRoom?.block?.name?.includes('Admin');
+
   // Helper to get room location coordinates for path line drawing
   const getRoomCenterPos = (roomNum) => {
     const num = roomNum?.toUpperCase() || '';
+
+    // Academic Block
     if (num === 'LH01') return { x: 150, y: 380 };
     if (num === 'LH02') return { x: 120, y: 110 };
     if (num === 'LH03') return { x: 240, y: 110 };
@@ -130,6 +134,33 @@ const DigitalTwinNavigationPage = () => {
     if (num === 'LH23B') return { x: 390, y: 380 };
     if (num === 'LH23') return { x: 640, y: 380 };
 
+    // Admin Block Ground Floor
+    if (num === 'LH51') return { x: 245, y: 90 };
+    if (num === 'LH52') return { x: 190, y: 90 };
+    if (num === 'LH50') return { x: 660, y: 260 };
+
+    // Admin Block 1st Floor
+    if (num === 'LH36') return { x: 550, y: 360 };
+    if (num === 'CL01') return { x: 645, y: 360 };
+    if (num === 'LH37') return { x: 840, y: 360 };
+    if (num === 'LH30') return { x: 550, y: 270 };
+
+    // Admin Block 2nd Floor
+    if (num === 'LH38') return { x: 560, y: 360 };
+    if (num === 'CL02') return { x: 660, y: 360 };
+    if (num === 'CL03') return { x: 750, y: 360 };
+    if (num === 'LH39') return { x: 850, y: 360 };
+    if (num === 'LH32') return { x: 560, y: 270 };
+    if (num === 'LH53') return { x: 630, y: 270 };
+    if (num === 'LH54') return { x: 700, y: 270 };
+
+    // Admin Block 3rd Floor
+    if (num === 'LH40') return { x: 550, y: 360 };
+    if (num === 'LH41') return { x: 840, y: 360 };
+    if (num === 'LH44') return { x: 290, y: 360 };
+    if (num === 'LH45') return { x: 95, y: 360 };
+    if (num === 'LH34') return { x: 550, y: 270 };
+
     return { x: 400, y: 250 };
   };
 
@@ -138,25 +169,32 @@ const DigitalTwinNavigationPage = () => {
     const targetNum = destinationRoom?.roomNumber || 'LH01';
     const targetPos = getRoomCenterPos(targetNum);
 
+    if (isAdminBlock) {
+      if (activeFloorLevel === 0) {
+        return `M 430 400 L 370 400 L 370 120 L 245 120 L 245 90`;
+      }
+      if (activeFloorLevel === 1) {
+        return `M 520 310 L 520 335 L 560 335 L 560 360`;
+      }
+      if (activeFloorLevel === 2) {
+        return `M 520 310 L 520 335 L 560 335 L 560 360`;
+      }
+      if (activeFloorLevel === 3) {
+        return `M 520 310 L 520 330 L 330 330 L 330 360 L 290 360`;
+      }
+    }
+
     if (activeFloorLevel === 0) {
       if (targetNum === 'LH01') return "M 400 400 L 400 310 L 150 310 L 150 340";
       if (targetNum === 'LH06') return "M 400 400 L 400 310 L 650 310 L 650 340";
       if (['LH02', 'LH03'].includes(targetNum)) return `M 400 400 L 400 310 L 150 310 L 150 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
       return `M 400 400 L 400 310 L 650 310 L 650 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
     } else if (activeFloorLevel === 3) {
-      // Third Floor path matching user screenshot (Stairs -> Left -> Up -> Left -> Target)
-      if (targetNum === 'LH19') {
-        return "M 600 250 L 530 250 L 530 215 L 340 215 L 340 160 L 235 160 L 235 120";
-      }
-      if (['LH18', 'LH20'].includes(targetNum)) {
-        return `M 600 250 L 530 250 L 530 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
-      }
-      if (['LH21', 'LH22'].includes(targetNum)) {
-        return `M 600 250 L 600 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
-      }
+      if (targetNum === 'LH19') return "M 600 250 L 530 250 L 530 215 L 340 215 L 340 160 L 235 160 L 235 120";
+      if (['LH18', 'LH20'].includes(targetNum)) return `M 600 250 L 530 250 L 530 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
+      if (['LH21', 'LH22'].includes(targetNum)) return `M 600 250 L 600 160 L ${targetPos.x} 160 L ${targetPos.x} 120`;
       return `M 600 250 L 600 320 L ${targetPos.x} 320 L ${targetPos.x} 340`;
     } else {
-      // First / Second floor
       if (['LH07', 'LH13'].includes(targetNum)) return "M 600 250 L 600 320 L 150 320 L 150 340";
       if (['LH12', 'LH16'].includes(targetNum)) return "M 600 250 L 600 320 L 650 320 L 650 340";
       if (['LH08', 'LH09', 'LH14'].includes(targetNum)) return `M 600 250 L 600 170 L ${targetPos.x} 170 L ${targetPos.x} 120`;
@@ -167,7 +205,7 @@ const DigitalTwinNavigationPage = () => {
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-96">
       <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
-      <p className="text-gray-500 font-medium text-sm">Initializing SIET Academic Block Twin Engine...</p>
+      <p className="text-gray-500 font-medium text-sm">Initializing SIET Digital Campus Twin Engine...</p>
     </div>
   );
 
@@ -184,7 +222,7 @@ const DigitalTwinNavigationPage = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="bg-blue-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md">SIET Academic Twin</span>
+              <span className="bg-blue-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md">SIET Campus Twin</span>
               <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">A* Indoor Navigation</span>
             </div>
             <h1 className="text-2xl font-black font-display text-gray-900 tracking-tight mt-0.5">
@@ -354,7 +392,7 @@ const DigitalTwinNavigationPage = () => {
 
           {/* Floor Selector Tabs */}
           <div className="bg-white p-2 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-2 overflow-x-auto">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-3">Academic Floor:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-3">Floor Level:</span>
             {[
               { level: 0, label: 'Ground Floor' },
               { level: 1, label: 'First Floor' },
@@ -378,19 +416,19 @@ const DigitalTwinNavigationPage = () => {
           {/* Interactive Digital Twin Visual Canvas */}
           <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden min-h-[540px] relative flex flex-col">
 
-            {/* Academic Floor Banner Header matching screenshot */}
+            {/* Banner Header matching screenshot */}
             <div className="p-4 bg-slate-100 border-b border-gray-200 flex items-center justify-between">
               <div className="bg-white px-4 py-1.5 rounded-full border border-gray-300 text-xs font-black text-gray-900 tracking-wide uppercase shadow-sm">
-                ACADEMIC BLOCK | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : activeFloorLevel === 2 ? 'SECOND FLOOR' : 'THIRD FLOOR'} | STAIRS → {destinationRoom?.roomNumber || 'LH19'}
+                {destinationRoom?.block?.name?.toUpperCase() || 'ADMINISTRATIVE BLOCK'} | {activeFloorLevel === 0 ? 'GROUND FLOOR' : activeFloorLevel === 1 ? 'FIRST FLOOR' : activeFloorLevel === 2 ? 'SECOND FLOOR' : 'THIRD FLOOR'} | ENTRANCE → {destinationRoom?.roomNumber || 'LH51'}
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-green-100 text-green-700 rounded-lg">
                 Verified SIET Floor Map
               </span>
             </div>
 
-            {/* SVG Canvas drawing exact layout matching screenshots */}
+            {/* SVG Canvas */}
             <div className="flex-1 p-6 relative flex items-center justify-center bg-slate-200 overflow-auto">
-              <svg viewBox="0 0 800 480" className="w-full max-w-3xl h-auto rounded-2xl shadow-xl border border-gray-400 bg-white">
+              <svg viewBox="0 0 920 480" className="w-full max-w-4xl h-auto rounded-2xl shadow-xl border border-gray-400 bg-white">
                 <defs>
                   <marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                     <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
@@ -398,200 +436,310 @@ const DigitalTwinNavigationPage = () => {
                 </defs>
 
                 {/* Outer Building Boundary */}
-                <rect x="50" y="50" width="700" height="390" fill="#f8fafc" stroke="#334155" strokeWidth="3" />
+                <rect x="40" y="40" width="840" height="400" fill="#f8fafc" stroke="#334155" strokeWidth="3" />
 
-                {/* ---------------- GROUND FLOOR (LEVEL 0) ---------------- */}
-                {activeFloorLevel === 0 && (
+                {/* --- RENDER ADMINISTRATIVE BLOCK MAP --- */}
+                {isAdminBlock ? (
                   <g>
-                    <g>
-                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH02</text>
+                    {/* GROUND FLOOR (LEVEL 0) */}
+                    {activeFloorLevel === 0 && (
+                      <g>
+                        {/* Top row */}
+                        <rect x="50" y="50" width="80" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="90" y="85" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">MECH LAB</text>
 
-                      <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH03</text>
+                        <rect x="130" y="50" width="55" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="157" y="85" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH52</text>
 
-                      <rect x="330" y="60" width="140" height="40" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
-                      <text x="400" y="85" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">EXIT</text>
+                        <rect x="185" y="50" width="55" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="212" y="85" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH51</text>
 
-                      <rect x="510" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="560" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH04</text>
+                        <rect x="240" y="50" width="60" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="270" y="82" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">MECH</text>
+                        <text x="270" y="94" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">DEPT.</text>
 
-                      <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH05</text>
-                    </g>
+                        <rect x="300" y="50" width="45" height="30" fill="#ffffff" stroke="#ef4444" strokeWidth="1.5" />
+                        <text x="322" y="70" fill="#dc2626" fontSize="9" fontWeight="900" textAnchor="middle">EXIT</text>
 
-                    <g>
-                      <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                        <rect x="430" y="50" width="45" height="30" fill="#ffffff" stroke="#ef4444" strokeWidth="1.5" />
+                        <text x="452" y="70" fill="#dc2626" fontSize="9" fontWeight="900" textAnchor="middle">EXIT</text>
 
-                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
-                    </g>
+                        <rect x="480" y="50" width="160" height="75" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="560" y="92" fill="#1e40af" fontSize="12" fontWeight="900" textAnchor="middle">LIBRARY</text>
 
-                    <g>
-                      <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH01</text>
+                        <rect x="650" y="50" width="215" height="75" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="757" y="92" fill="#dc2626" fontSize="13" fontWeight="900" textAnchor="middle">SEMINAR HALL-2</text>
 
-                      <rect x="320" y="380" width="160" height="50" fill="#ffffff" stroke="#dc2626" strokeWidth="2" />
-                      <text x="400" y="412" fill="#dc2626" fontSize="13" fontWeight="900" textAnchor="middle">ENTRY</text>
+                        {/* Middle Rows Left */}
+                        <rect x="50" y="170" width="110" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="105" y="205" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">EEE LAB</text>
 
-                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH06</text>
-                    </g>
+                        <rect x="160" y="170" width="115" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="217" y="205" fill="#1e40af" fontSize="10" fontWeight="900" textAnchor="middle">EEE DEPT.</text>
+
+                        <rect x="50" y="300" width="110" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="105" y="335" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">EE LAB</text>
+
+                        <rect x="160" y="300" width="115" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="217" y="330" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">AGRI</text>
+                        <text x="217" y="342" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">DEPT.</text>
+
+                        {/* Middle Rows Right */}
+                        <rect x="480" y="200" width="100" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="530" y="228" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">CIVIL</text>
+                        <text x="530" y="240" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">DEPT.</text>
+
+                        <rect x="580" y="200" width="70" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="615" y="235" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH50</text>
+
+                        <rect x="650" y="200" width="215" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="757" y="235" fill="#a855f7" fontSize="11" fontWeight="900" textAnchor="middle">STRENGTH MATERIAL LAB</text>
+
+                        <rect x="480" y="310" width="385" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="672" y="345" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">OFFICE ROOM</text>
+
+                        {/* Bottom Row */}
+                        <rect x="50" y="400" width="225" height="35" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="162" y="422" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">AGRI DEPARTMENT</text>
+
+                        <rect x="345" y="400" width="85" height="35" fill="#ffffff" stroke="#dc2626" strokeWidth="2" />
+                        <text x="387" y="422" fill="#dc2626" fontSize="11" fontWeight="900" textAnchor="middle">ENTRANCE</text>
+                      </g>
+                    )}
+
+                    {/* FIRST / SECOND / THIRD FLOOR (LEVEL 1, 2, 3) */}
+                    {activeFloorLevel > 0 && (
+                      <g>
+                        {/* Common Bottom Toilets */}
+                        <rect x="50" y="400" width="235" height="35" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="167" y="422" fill="#475569" fontSize="11" fontWeight="900" textAnchor="middle">BOYS TOILET</text>
+
+                        <rect x="480" y="400" width="385" height="35" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                        <text x="672" y="422" fill="#475569" fontSize="11" fontWeight="900" textAnchor="middle">GIRLS TOILET</text>
+
+                        {/* LEVEL 1 */}
+                        {activeFloorLevel === 1 && (
+                          <g>
+                            <rect x="50" y="300" width="55" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="77" y="335" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">CHEM</text>
+
+                            <rect x="105" y="300" width="55" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="132" y="335" fill="#1e40af" fontSize="9" fontWeight="900" textAnchor="middle">ENG</text>
+
+                            <rect x="160" y="300" width="55" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="187" y="335" fill="#a855f7" fontSize="9" fontWeight="900" textAnchor="middle">PHY LAB</text>
+
+                            <rect x="215" y="300" width="60" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="245" y="335" fill="#a855f7" fontSize="9" fontWeight="900" textAnchor="middle">PROZONE</text>
+
+                            <rect x="480" y="300" width="80" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="520" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH36</text>
+
+                            <rect x="560" y="300" width="90" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="605" y="335" fill="#a855f7" fontSize="11" fontWeight="900" textAnchor="middle">CL01</text>
+
+                            <rect x="650" y="300" width="110" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="705" y="335" fill="#1e40af" fontSize="10" fontWeight="900" textAnchor="middle">CSE DEPT</text>
+
+                            <rect x="760" y="300" width="105" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="812" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH37</text>
+                          </g>
+                        )}
+
+                        {/* LEVEL 2 */}
+                        {activeFloorLevel === 2 && (
+                          <g>
+                            <rect x="50" y="300" width="80" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="90" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH43</text>
+
+                            <rect x="130" y="300" width="70" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="165" y="335" fill="#a855f7" fontSize="11" fontWeight="900" textAnchor="middle">CL11</text>
+
+                            <rect x="200" y="300" width="75" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="237" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH42</text>
+
+                            <rect x="480" y="300" width="95" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="527" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH38</text>
+
+                            <rect x="575" y="300" width="90" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="620" y="335" fill="#a855f7" fontSize="11" fontWeight="900" textAnchor="middle">CL02</text>
+
+                            <rect x="665" y="300" width="90" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="710" y="335" fill="#a855f7" fontSize="11" fontWeight="900" textAnchor="middle">CL03</text>
+
+                            <rect x="755" y="300" width="110" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="810" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH39</text>
+                          </g>
+                        )}
+
+                        {/* LEVEL 3 */}
+                        {activeFloorLevel === 3 && (
+                          <g>
+                            <rect x="50" y="300" width="50" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="75" y="335" fill="#1e40af" fontSize="10" fontWeight="900" textAnchor="middle">LH45</text>
+
+                            <rect x="100" y="300" width="80" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="140" y="328" fill="#1e40af" fontSize="8" fontWeight="900" textAnchor="middle">AIDS DEPT</text>
+                            <text x="140" y="340" fill="#a855f7" fontSize="8" fontWeight="900" textAnchor="middle">CL15</text>
+
+                            <rect x="180" y="300" width="50" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="205" y="335" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">CL14</text>
+
+                            <rect x="230" y="300" width="45" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="252" y="335" fill="#1e40af" fontSize="10" fontWeight="900" textAnchor="middle">LH44</text>
+
+                            <rect x="480" y="300" width="65" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="512" y="335" fill="#1e40af" fontSize="10" fontWeight="900" textAnchor="middle">LH40</text>
+
+                            <rect x="545" y="300" width="105" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="597" y="328" fill="#1e40af" fontSize="8" fontWeight="900" textAnchor="middle">CYBER SECURITY</text>
+                            <text x="597" y="340" fill="#1e40af" fontSize="8" fontWeight="900" textAnchor="middle">DEPARTMENT</text>
+
+                            <rect x="650" y="300" width="80" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="690" y="335" fill="#a855f7" fontSize="10" fontWeight="900" textAnchor="middle">CL04</text>
+
+                            <rect x="730" y="300" width="135" height="60" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
+                            <text x="797" y="335" fill="#1e40af" fontSize="11" fontWeight="900" textAnchor="middle">LH41</text>
+                          </g>
+                        )}
+
+                        {/* Middle Stairs Indicator */}
+                        <g>
+                          <rect x="480" y="270" width="385" height="20" fill="#ffffff" stroke="#dc2626" strokeWidth="1" />
+                          <text x="520" y="284" fill="#dc2626" fontSize="9" fontWeight="900" textAnchor="middle">STAIRS</text>
+                        </g>
+                      </g>
+                    )}
                   </g>
-                )}
-
-                {/* ---------------- FIRST FLOOR (LEVEL 1) ---------------- */}
-                {activeFloorLevel === 1 && (
+                ) : (
+                  /* --- RENDER ACADEMIC BLOCK MAP --- */
                   <g>
-                    <g>
-                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH08</text>
+                    {activeFloorLevel === 0 && (
+                      <g>
+                        <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH02</text>
 
-                      <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH09</text>
+                        <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH03</text>
 
-                      <rect x="510" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="560" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH10</text>
+                        <rect x="330" y="60" width="140" height="40" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
+                        <text x="400" y="85" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">EXIT</text>
 
-                      <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH11</text>
-                    </g>
+                        <rect x="510" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="560" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH04</text>
 
-                    <g>
-                      <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                        <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH05</text>
 
-                      <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+                        <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
-                    </g>
+                        <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                    <g>
-                      <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH07</text>
+                        <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH01</text>
 
-                      <rect x="300" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
-                      <text x="345" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">GIRLS</text>
-                      <text x="345" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+                        <rect x="320" y="380" width="160" height="50" fill="#ffffff" stroke="#dc2626" strokeWidth="2" />
+                        <text x="400" y="412" fill="#dc2626" fontSize="13" fontWeight="900" textAnchor="middle">ENTRY</text>
 
-                      <rect x="410" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
-                      <text x="455" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">BOYS</text>
-                      <text x="455" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+                        <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH06</text>
+                      </g>
+                    )}
 
-                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH12</text>
-                    </g>
-                  </g>
-                )}
+                    {activeFloorLevel === 1 && (
+                      <g>
+                        <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH08</text>
 
-                {/* ---------------- SECOND FLOOR (LEVEL 2) ---------------- */}
-                {activeFloorLevel === 2 && (
-                  <g>
-                    <g>
-                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH14</text>
+                        <rect x="190" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="240" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH09</text>
 
-                      <rect x="230" y="60" width="340" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="400" y="102" fill="#dc2626" fontSize="14" fontWeight="900" textAnchor="middle">SEMINAR HALL - 1</text>
+                        <rect x="510" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="560" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH10</text>
 
-                      <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH15</text>
-                    </g>
+                        <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH11</text>
 
-                    <g>
-                      <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="70" y1="210" x2="250" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="70" y1="240" x2="250" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="70" y1="270" x2="250" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+                        <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+                        <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
 
-                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
-                    </g>
+                        <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                    <g>
-                      <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH13</text>
+                        <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH07</text>
 
-                      <rect x="300" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
-                      <text x="345" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">GIRLS</text>
-                      <text x="345" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+                        <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH12</text>
+                      </g>
+                    )}
 
-                      <rect x="410" y="350" width="90" height="80" fill="#ffffff" stroke="#1e293b" strokeWidth="1.5" />
-                      <text x="455" y="385" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">BOYS</text>
-                      <text x="455" y="398" fill="#475569" fontSize="9" fontWeight="900" textAnchor="middle">TOILET</text>
+                    {activeFloorLevel === 2 && (
+                      <g>
+                        <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH14</text>
 
-                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH16</text>
-                    </g>
-                  </g>
-                )}
+                        <rect x="230" y="60" width="340" height="70" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="400" y="102" fill="#dc2626" fontSize="14" fontWeight="900" textAnchor="middle">SEMINAR HALL - 1</text>
 
-                {/* ---------------- THIRD FLOOR (LEVEL 3) ---------------- */}
-                {activeFloorLevel === 3 && (
-                  <g>
-                    {/* Top Row: LH18, LH19, LH20, LH21, LH22 */}
-                    <g>
-                      <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH18</text>
+                        <rect x="630" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="680" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH15</text>
 
-                      <rect x="190" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="235" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH19</text>
+                        <rect x="70" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="160" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      <rect x="290" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="335" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH20</text>
+                        <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
 
-                      <rect x="390" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="435" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH21</text>
+                        <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
 
-                      <rect x="610" y="60" width="120" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="670" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH22</text>
-                    </g>
+                        <rect x="70" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="160" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH13</text>
 
-                    {/* Middle Row: Courtyard Void, Stairs East */}
-                    <g>
-                      <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+                        <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH16</text>
+                      </g>
+                    )}
 
-                      <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <line x1="550" y1="210" x2="730" y2="210" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="240" x2="730" y2="240" stroke="#94a3b8" strokeWidth="1.5" />
-                      <line x1="550" y1="270" x2="730" y2="270" stroke="#94a3b8" strokeWidth="1.5" />
-                      <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
-                    </g>
+                    {activeFloorLevel === 3 && (
+                      <g>
+                        <rect x="70" y="60" width="100" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="120" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH18</text>
 
-                    {/* Bottom Row: LH17, LH23A, LH23B, LH23 */}
-                    <g>
-                      <rect x="70" y="330" width="150" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="145" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH17</text>
+                        <rect x="190" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="235" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH19</text>
 
-                      <rect x="230" y="330" width="100" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="280" y="390" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH23A</text>
+                        <rect x="290" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="335" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH20</text>
 
-                      <rect x="340" y="330" width="100" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="390" y="390" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH23B</text>
+                        <rect x="390" y="60" width="90" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="435" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH21</text>
 
-                      <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
-                      <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH23</text>
-                    </g>
+                        <rect x="610" y="60" width="120" height="90" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="670" y="115" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH22</text>
+
+                        <rect x="310" y="190" width="180" height="100" rx="12" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="2" />
+
+                        <rect x="550" y="180" width="180" height="120" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="215" fill="#dc2626" fontSize="12" fontWeight="900" textAnchor="middle">STAIRS</text>
+
+                        <rect x="70" y="330" width="150" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="145" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH17</text>
+
+                        <rect x="230" y="330" width="100" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="280" y="390" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH23A</text>
+
+                        <rect x="340" y="330" width="100" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="390" y="390" fill="#1e40af" fontSize="13" fontWeight="900" textAnchor="middle">LH23B</text>
+
+                        <rect x="550" y="330" width="180" height="100" fill="#ffffff" stroke="#1e293b" strokeWidth="2" />
+                        <text x="640" y="390" fill="#1e40af" fontSize="14" fontWeight="900" textAnchor="middle">LH23</text>
+                      </g>
+                    )}
                   </g>
                 )}
 
@@ -624,7 +772,7 @@ const DigitalTwinNavigationPage = () => {
             <div className="p-4 bg-slate-100 border-t border-gray-200 text-gray-600 text-xs flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-blue-600" />
-                <span>Path highlighted in red dashed line following Academic Block corridors.</span>
+                <span>Path highlighted in red dashed line following {destinationRoom?.block?.name || 'Administrative Block'} corridors.</span>
               </div>
               <span className="text-[10px] uppercase tracking-widest font-bold text-gray-500">SIET Digital Twin Spatial Model</span>
             </div>
