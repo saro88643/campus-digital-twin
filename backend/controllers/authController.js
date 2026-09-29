@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import asyncHandler from '../middleware/asyncHandler.js';
+import { logActivity } from '../utils/activityLogger.js';
 
 // Generate Token
 const generateToken = (id) => {
@@ -9,11 +10,11 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register user
+// @desc    Register user (Public registration is always role 'user')
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
   const userExists = await User.findOne({ email });
 
@@ -22,14 +23,16 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
+  // Public registration is restricted to standard 'user' role
   const user = await User.create({
     name,
     email,
     password,
-    role: role || 'user',
+    role: 'user',
   });
 
   if (user) {
+    await logActivity('Create', `User ${user.name}`, 'System', `New user registered as ${user.role}`);
     res.status(201).json({
       success: true,
       _id: user._id,
@@ -62,6 +65,8 @@ export const loginUser = asyncHandler(async (req, res) => {
       res.status(403);
       throw new Error('Your account has been deactivated');
     }
+
+    await logActivity('Login', `User ${user.name}`, user.name, `${user.role.toUpperCase()} Session Started`);
 
     res.json({
       success: true,

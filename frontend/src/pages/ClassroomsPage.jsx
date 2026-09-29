@@ -19,12 +19,26 @@ import {
   Clock,
   Navigation,
   Compass,
-  Info
+  Info,
+  Calendar,
+  UserCheck
 } from 'lucide-react';
 import api from '../services/api';
 import useAuth from '../hooks/useAuth';
 import { getStatusTone } from '../utils/formatters';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+
+// Helper to format Date for <input type="datetime-local" />
+const toDatetimeLocal = (d, defaultOffsetHours = 0) => {
+  const date = d ? new Date(d) : new Date(Date.now() + defaultOffsetHours * 60 * 60 * 1000);
+  const pad = (n) => (n < 10 ? '0' + n : n);
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
 const ClassroomsPage = () => {
   const [searchParams] = useSearchParams();
@@ -45,7 +59,7 @@ const ClassroomsPage = () => {
   const isAdmin = userInfo?.role === 'admin';
   const navigate = useNavigate();
 
-  // Form state
+  // Form state with occupiedFrom & occupiedUntil
   const [formData, setFormData] = useState({
     roomNumber: '',
     name: '',
@@ -67,6 +81,13 @@ const ClassroomsPage = () => {
       labEquipment: false,
     },
     status: 'Available',
+    occupancy: {
+      eventName: '',
+      occupiedBySection: '',
+      occupiedFrom: toDatetimeLocal(null, 0),
+      occupiedUntil: toDatetimeLocal(null, 2),
+      notes: ''
+    },
     assignedStaff: '',
     workingHours: '',
     purpose: '',
@@ -98,7 +119,7 @@ const ClassroomsPage = () => {
   };
 
   const handleBlockChange = async (blockId) => {
-    setFormData({ ...formData, block: blockId, floor: '' });
+    setFormData(prev => ({ ...prev, block: blockId, floor: '' }));
     if (blockId) {
       try {
         const { data } = await api.get(`/floors?blockId=${blockId}`);
@@ -132,7 +153,14 @@ const ClassroomsPage = () => {
         department: room.department?._id || room.department || '',
         capacity: room.capacity || 0,
         facilities: { ...room.facilities },
-        status: room.status,
+        status: room.status || 'Available',
+        occupancy: {
+          eventName: room.occupancy?.eventName || '',
+          occupiedBySection: room.occupancy?.occupiedBySection || '',
+          occupiedFrom: toDatetimeLocal(room.occupancy?.occupiedFrom, 0),
+          occupiedUntil: toDatetimeLocal(room.occupancy?.occupiedUntil, 2),
+          notes: room.occupancy?.notes || ''
+        },
         assignedStaff: room.assignedStaff || '',
         workingHours: room.workingHours || '',
         purpose: room.purpose || '',
@@ -166,6 +194,13 @@ const ClassroomsPage = () => {
           labEquipment: false,
         },
         status: 'Available',
+        occupancy: {
+          eventName: '',
+          occupiedBySection: '',
+          occupiedFrom: toDatetimeLocal(null, 0),
+          occupiedUntil: toDatetimeLocal(null, 2),
+          notes: ''
+        },
         assignedStaff: '',
         workingHours: '08:00 - 18:00',
         purpose: '',
@@ -195,10 +230,35 @@ const ClassroomsPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingRoom) {
-        await api.put(`/rooms/${editingRoom._id}`, formData);
+      const payload = { ...formData };
+
+      // Sanitize empty string ID fields to prevent Mongoose CastError
+      if (!payload.department || payload.department === '') {
+        payload.department = null;
+      }
+
+      if (formData.status === 'Occupied') {
+        payload.occupancy = {
+          eventName: formData.occupancy.eventName || 'Class / Event',
+          occupiedBySection: formData.occupancy.occupiedBySection || 'Active Section',
+          occupiedFrom: new Date(formData.occupancy.occupiedFrom),
+          occupiedUntil: new Date(formData.occupancy.occupiedUntil),
+          notes: formData.occupancy.notes || ''
+        };
       } else {
-        await api.post('/rooms', formData);
+        payload.occupancy = {
+          eventName: '',
+          occupiedBySection: '',
+          occupiedFrom: null,
+          occupiedUntil: null,
+          notes: ''
+        };
+      }
+
+      if (editingRoom) {
+        await api.put(`/rooms/${editingRoom._id}`, payload);
+      } else {
+        await api.post('/rooms', payload);
       }
       handleCloseModal();
       fetchInitialData();
@@ -311,7 +371,7 @@ const ClassroomsPage = () => {
               key={room._id}
               className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 hover:shadow-xl hover:border-blue-100 transition-all group flex flex-col h-full relative"
             >
-              <div className="flex items-start justify-between mb-6">
+              <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-blue-600 font-black text-lg group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
                   {room.roomNumber}
                 </div>
@@ -347,7 +407,7 @@ const ClassroomsPage = () => {
 
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{room.name}</h3>
-                <div className="flex items-center gap-4 text-xs font-bold text-gray-400 mb-6">
+                <div className="flex items-center gap-4 text-xs font-bold text-gray-400 mb-4">
                   <div className="flex items-center gap-1.5 uppercase tracking-tighter">
                     <Building2 className="w-3.5 h-3.5" />
                     {room.block?.code || 'Main'}
@@ -357,6 +417,27 @@ const ClassroomsPage = () => {
                     Floor {room.floor?.floorNumber}
                   </div>
                 </div>
+
+                {/* OCCUPANCY DETAILS BADGE WITH START & END DATETIME */}
+                {room.status === 'Occupied' && room.occupancy?.eventName && (
+                  <div className="p-3.5 bg-blue-50/80 border border-blue-100 rounded-2xl mb-4 text-xs space-y-1.5 animate-in fade-in">
+                    <div className="flex items-center justify-between font-bold text-blue-950">
+                      <span className="flex items-center gap-1.5 truncate"><Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0"/> {room.occupancy.eventName}</span>
+                      <span className="text-[9px] bg-blue-200 text-blue-900 px-2 py-0.5 rounded-md uppercase font-black shrink-0">{room.occupancy.occupiedBySection || 'Occupied'}</span>
+                    </div>
+                    {room.occupancy.occupiedFrom && room.occupancy.occupiedUntil && (
+                      <div className="text-[10px] text-blue-700 flex flex-col gap-0.5 font-bold pt-1 border-t border-blue-100">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-blue-600 shrink-0" />
+                          <span>From: {new Date(room.occupancy.occupiedFrom).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {new Date(room.occupancy.occupiedFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div className="flex items-center gap-1 pl-4 text-blue-800">
+                          <span>Until: {new Date(room.occupancy.occupiedUntil).toLocaleDateString([], { month: 'short', day: 'numeric' })} at {new Date(room.occupancy.occupiedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center justify-between text-sm">
@@ -377,7 +458,7 @@ const ClassroomsPage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons: Find Path & Specifications */}
+              {/* Action Buttons */}
               <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
                 <button
                   onClick={() => navigate(`/digital-twin/navigate/${room._id}`)}
@@ -516,7 +597,7 @@ const ClassroomsPage = () => {
                   </div>
                 </div>
 
-                {/* Infrastructure Column */}
+                {/* Infrastructure & Status Column */}
                 <div className="space-y-8">
                   <div className="space-y-6">
                     <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] border-b border-blue-100 pb-2 flex items-center gap-2">
@@ -543,21 +624,98 @@ const ClassroomsPage = () => {
                     </div>
                   </div>
 
+                  {/* STATUS & OCCUPANCY DETAILS WITH START & END DATETIME */}
                   <div className="space-y-6">
-                    <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] border-b border-blue-100 pb-2">Status & Technical Notes</h4>
+                    <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] border-b border-blue-100 pb-2">Status & Classroom Usage</h4>
+
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Inventory Status</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Room Status</label>
                       <select
                         value={formData.status}
                         onChange={(e) => setFormData({...formData, status: e.target.value})}
                         className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-100 transition-all font-bold cursor-pointer"
                       >
-                        <option value="Available">Available / Free</option>
-                        <option value="Occupied">In-Use / Occupied</option>
+                        <option value="Available">Available (Empty)</option>
+                        <option value="Occupied">Occupied (In-Use)</option>
                         <option value="Under Maintenance">Under Maintenance</option>
                         <option value="Temporarily Closed">Temporarily Closed</option>
                       </select>
                     </div>
+
+                    {/* Show Occupancy Form Fields with START and END Date & Time */}
+                    {formData.status === 'Occupied' && (
+                      <div className="p-5 bg-blue-50/80 border border-blue-200 rounded-3xl space-y-4 animate-in fade-in">
+                        <div className="flex items-center gap-2 text-xs font-black text-blue-900 uppercase tracking-wider">
+                          <UserCheck className="w-4 h-4 text-blue-600" /> Occupancy & Event Schedule
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Event / Subject Name</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Hackathon / Class Lecture"
+                            value={formData.occupancy.eventName}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              occupancy: { ...formData.occupancy, eventName: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-300"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Occupying Section / Group</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. CSE - 3rd Year Sec B"
+                            value={formData.occupancy.occupiedBySection}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              occupancy: { ...formData.occupancy, occupiedBySection: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-300"
+                          />
+                        </div>
+
+                        {/* START DATE & TIME */}
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-blue-600" /> Start Date & Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            required
+                            value={formData.occupancy.occupiedFrom}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              occupancy: { ...formData.occupancy, occupiedFrom: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 bg-white border border-blue-300 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-400 cursor-pointer shadow-xs"
+                          />
+                        </div>
+
+                        {/* END DATE & TIME */}
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-blue-600" /> End Date & Time
+                          </label>
+                          <input
+                            type="datetime-local"
+                            required
+                            value={formData.occupancy.occupiedUntil}
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              occupancy: { ...formData.occupancy, occupiedUntil: e.target.value }
+                            })}
+                            className="w-full px-4 py-2.5 bg-white border border-blue-300 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-400 cursor-pointer shadow-xs"
+                          />
+                          <p className="text-[10px] text-gray-500 font-medium pt-0.5">The room shows as Occupied ONLY between the Start and End date/time period. Otherwise it remains Empty/Available.</p>
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 </div>
               </div>

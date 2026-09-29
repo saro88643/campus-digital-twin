@@ -6,7 +6,7 @@ const AuthLayout = () => {
   const { userInfo } = useAuth();
 
   if (userInfo) {
-    return <Navigate to={userInfo.role === 'admin' ? '/dashboard' : '/campus-twin'} />;
+    return <Navigate to="/dashboard" />;
   }
 
   return (

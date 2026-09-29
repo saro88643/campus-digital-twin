@@ -19,7 +19,9 @@ import {
   Contact,
   Navigation,
   Compass,
-  Info
+  Info,
+  Calendar,
+  UserCheck
 } from 'lucide-react';
 import api from '../services/api';
 import { getStatusTone, formatDate } from '../utils/formatters';
@@ -117,6 +119,30 @@ const RoomDetailPage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* LIVE OCCUPANCY BANNER (VISIBLE TO EVERYONE) */}
+              {room?.status === 'Occupied' && room?.occupancy?.eventName && (
+                <div className="p-6 bg-gradient-to-br from-blue-900 to-slate-900 rounded-3xl text-white shadow-xl mb-8 space-y-3 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-300 flex items-center gap-1.5">
+                      <UserCheck className="w-4 h-4 text-blue-400" /> Active Occupation Schedule
+                    </span>
+                    <span className="bg-blue-500/30 text-blue-200 text-[9px] font-black uppercase px-2.5 py-1 rounded-lg border border-blue-400/30">
+                      In-Use
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black font-display">{room.occupancy.eventName}</h4>
+                    <p className="text-xs text-blue-200 font-bold mt-1">Section / Group: {room.occupancy.occupiedBySection || 'Active Section'}</p>
+                  </div>
+                  {room.occupancy.occupiedUntil && (
+                    <div className="pt-2 border-t border-white/10 text-xs text-blue-300 font-bold flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-400" />
+                      Auto-expires & sets room to Empty at {new Date(room.occupancy.occupiedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({new Date(room.occupancy.occupiedUntil).toLocaleDateString()})
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 p-6 bg-gray-50/50 rounded-3xl border border-gray-100">
                 <StatItem icon={Users} label="Capacity" value={`${room?.capacity} Seats`} />

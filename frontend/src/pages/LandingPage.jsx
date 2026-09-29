@@ -42,8 +42,8 @@ const LandingPage = () => {
             </div>
             <div className="flex items-center gap-4">
               <Link to="/login" className="text-sm font-semibold text-gray-600 hover:text-gray-900">Sign in</Link>
-              <Link to="/login" className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
-                Get Started
+              <Link to="/register" className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
+                Register
               </Link>
             </div>
           </div>
@@ -66,12 +66,12 @@ const LandingPage = () => {
                 Experience a complete digital twin of your institution. Manage blocks, classrooms, and facilities with real-time accuracy and professional insights.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/login" className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center gap-2">
-                  Launch Platform <ArrowRight className="w-5 h-5" />
+                <Link to="/register" className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center gap-2">
+                  Create Account <ArrowRight className="w-5 h-5" />
                 </Link>
-                <button className="bg-white text-gray-900 border-2 border-gray-100 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition-all">
-                  Request Demo
-                </button>
+                <Link to="/login" className="bg-white text-gray-900 border-2 border-gray-100 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition-all">
+                  Sign In
+                </Link>
               </div>
 
               {/* Quick Stats Grid */}

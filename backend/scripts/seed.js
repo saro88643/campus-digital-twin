@@ -11,6 +11,7 @@ import Faculty from '../models/Faculty.js';
 import Asset from '../models/Asset.js';
 import NavigationNode from '../models/NavigationNode.js';
 import NavigationEdge from '../models/NavigationEdge.js';
+import ActivityLog from '../models/ActivityLog.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ const seedData = async () => {
     await Asset.deleteMany();
     await NavigationNode.deleteMany();
     await NavigationEdge.deleteMany();
+    await ActivityLog.deleteMany();
 
     console.log('Seeding users...');
     await User.create({ name: 'Administrator', email: 'admin@campus.edu', password: 'admin123', role: 'admin' });
@@ -246,7 +248,16 @@ const seedData = async () => {
       { employeeId: 'EMP_AIDS_01', name: 'Dr. S. Priya', department: deptAIDS._id, designation: 'Associate Professor', email: 'priya.s@sreeshakthi.edu.in', phone: '+91 98422 33445', officeRoom: roomLH55._id, subjects: ['Artificial Intelligence', 'Machine Learning'] }
     ]);
 
-    console.log('Database re-seeded successfully with precise navigation nodes for LH55 and all rooms!');
+    console.log('Seeding initial activity logs...');
+    await ActivityLog.create([
+      { action: 'Update', item: 'Room LH55', user: 'Admin', details: 'Occupancy set for Hackathon Event', color: 'bg-orange-500' },
+      { action: 'Create', item: 'Academic Block', user: 'Admin', details: 'Initialized 4 floors with 23 lecture halls', color: 'bg-green-500' },
+      { action: 'Update', item: 'Administrative Block', user: 'Admin', details: 'Added Computer Labs CL01 - CL15', color: 'bg-blue-500' },
+      { action: 'Login', item: 'User Administrator', user: 'Administrator', details: 'Admin Session Started', color: 'bg-purple-500' },
+      { action: 'Create', item: 'Room LH01', user: 'Admin', details: 'Lecture Hall 01 initialized', color: 'bg-green-500' },
+    ]);
+
+    console.log('Database re-seeded successfully with activity logs!');
     process.exit();
   } catch (error) {
     console.error(`Error seeding database: ${error.message}`);

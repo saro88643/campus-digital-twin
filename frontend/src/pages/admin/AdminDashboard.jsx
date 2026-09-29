@@ -11,27 +11,46 @@ import {
   CheckCircle2,
   Clock,
   ArrowUpRight,
-  ShieldCheck
+  ShieldCheck,
+  Activity
 } from 'lucide-react';
 import api from '../../services/api';
 
+import useAuth from '../../hooks/useAuth';
+
 const AdminDashboard = () => {
+  const { userInfo } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const isAdmin = userInfo?.role === 'admin';
+
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await api.get('/dashboard/stats');
-        setStats(data.data);
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
+    fetchDashboardStats();
   }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      const { data } = await api.get('/dashboard/stats');
+      setStats(data.data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRelativeTime = (timestamp) => {
+    if (!timestamp) return 'Just now';
+    const diffMs = Date.now() - new Date(timestamp).getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center h-96">
@@ -53,8 +72,14 @@ const AdminDashboard = () => {
       {/* Welcome Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold font-display text-gray-900 tracking-tight">Admin Console</h2>
-          <p className="text-gray-500 mt-1">Institutional metrics and real-time management control.</p>
+          <h2 className="text-3xl font-bold font-display text-gray-900 tracking-tight">
+            {isAdmin ? 'Admin Console' : `Welcome, ${userInfo?.name || 'User'}`}
+          </h2>
+          <p className="text-gray-500 mt-1">
+            {isAdmin
+              ? 'Institutional metrics and real-time management control.'
+              : 'Campus overview, live classroom utilization, and interactive navigation.'}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-2">
@@ -115,21 +140,44 @@ const AdminDashboard = () => {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Quick Actions */}
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-3xl text-white shadow-xl shadow-blue-200">
-              <h3 className="text-xl font-bold font-display mb-4">Quick Management</h3>
-              <p className="text-blue-100 text-sm mb-8">Direct access to core data entry modules.</p>
+              <h3 className="text-xl font-bold font-display mb-4">
+                {isAdmin ? 'Quick Management' : 'Quick Navigation'}
+              </h3>
+              <p className="text-blue-100 text-sm mb-8">
+                {isAdmin ? 'Direct access to core data entry modules.' : 'Direct access to campus twin features.'}
+              </p>
               <div className="grid grid-cols-2 gap-3">
-                <Link to="/blocks" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
-                  New Block <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </Link>
-                <Link to="/classrooms" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
-                  Add Room <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </Link>
-                <Link to="/facilities" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
-                  Add Asset <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </Link>
-                <Link to="/departments" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
-                  New Dept <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </Link>
+                {isAdmin ? (
+                  <>
+                    <Link to="/admin/blocks" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Blocks <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                    <Link to="/admin/rooms" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Rooms <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                    <Link to="/admin/facilities" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Facilities <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                    <Link to="/admin/users" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Manage Users <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/campus-twin" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Campus Twin <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                    <Link to="/blocks" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Explore Blocks <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                    <Link to="/classrooms" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      Find Classrooms <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                    <Link to="/facilities" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group">
+                      View Facilities <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
 
@@ -147,49 +195,67 @@ const AdminDashboard = () => {
                 <div className="flex items-center justify-between p-3 rounded-2xl bg-green-50 border border-green-100">
                   <div className="flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-bold text-green-700">Auth Service</span>
+                    <span className="text-sm font-bold text-green-700">Activity Auditor</span>
                   </div>
-                  <span className="text-[10px] font-black text-green-600 uppercase">Secure</span>
+                  <span className="text-[10px] font-black text-green-600 uppercase">Active</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity Sidebar */}
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold font-display text-gray-900">Activity Log</h3>
-            <span className="p-2 bg-gray-50 rounded-lg text-gray-400">
-              <Clock className="w-4 h-4" />
-            </span>
-          </div>
+        {/* Live Activity Log Sidebar */}
+        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-bold font-display text-gray-900 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-blue-600" /> Activity Log
+              </h3>
+              <button
+                onClick={fetchDashboardStats}
+                className="p-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+                title="Refresh Activity Log"
+              >
+                <Clock className="w-4 h-4" />
+              </button>
+            </div>
 
-          <div className="space-y-8">
-            {[
-              { type: 'Update', item: 'Room F101', user: 'Admin', time: '12m ago', color: 'bg-blue-500' },
-              { type: 'Create', item: 'MECHB G02', user: 'Admin', time: '1h ago', color: 'bg-green-500' },
-              { type: 'Alert', item: 'AC Unit MB', user: 'System', time: '3h ago', color: 'bg-orange-500' },
-              { type: 'Login', item: 'Dr. Karthik', user: 'User', time: '5h ago', color: 'bg-purple-500' },
-              { type: 'Update', item: 'Staff Room', user: 'Admin', time: '8h ago', color: 'bg-blue-500' },
-            ].map((activity, i) => (
-              <div key={i} className="flex gap-4 relative group">
-                {i < 4 && <div className="absolute left-[7px] top-6 bottom-[-32px] w-[2px] bg-gray-50 group-hover:bg-gray-100 transition-colors"></div>}
-                <div className={`w-4 h-4 rounded-full ${activity.color} ring-4 ring-white z-10 shrink-0`}></div>
-                <div className="min-w-0">
-                  <div className="text-sm font-bold text-gray-900 truncate">{activity.type}: {activity.item}</div>
-                  <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-                    <span>by {activity.user}</span>
-                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                    <span>{activity.time}</span>
+            <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              {stats?.recentActivities && stats.recentActivities.length > 0 ? (
+                stats.recentActivities.map((activity, i) => (
+                  <div key={activity._id || i} className="flex gap-4 relative group">
+                    {i < stats.recentActivities.length - 1 && (
+                      <div className="absolute left-[7px] top-6 bottom-[-24px] w-[2px] bg-gray-100 group-hover:bg-gray-200 transition-colors"></div>
+                    )}
+                    <div className={`w-4 h-4 rounded-full ${activity.color || 'bg-blue-500'} ring-4 ring-white z-10 shrink-0 mt-1`}></div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-gray-900 truncate">
+                        {activity.action}: {activity.item}
+                      </div>
+                      {activity.details && (
+                        <p className="text-[11px] text-gray-500 font-medium truncate">{activity.details}</p>
+                      )}
+                      <div className="text-[10px] text-gray-400 flex items-center gap-2 mt-0.5 font-bold">
+                        <span>by {activity.user || 'Admin'}</span>
+                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                        <span>{getRelativeTime(activity.createdAt)}</span>
+                      </div>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-gray-400 text-sm font-medium">
+                  No activity logs recorded yet.
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
 
-          <button className="w-full mt-10 py-3 bg-gray-50 hover:bg-gray-100 rounded-2xl text-sm font-bold text-gray-600 transition-all">
-            View Full Audit Trail
+          <button
+            onClick={fetchDashboardStats}
+            className="w-full mt-8 py-3 bg-gray-50 hover:bg-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-600 transition-all shadow-xs"
+          >
+            Refresh Audit Trail
           </button>
         </div>
       </div>

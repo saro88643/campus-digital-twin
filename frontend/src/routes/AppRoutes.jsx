@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
 import LandingPage from '../pages/LandingPage';
 import CampusTwinPage from '../pages/CampusTwinPage';
 import BlocksPage from '../pages/BlocksPage';
@@ -25,6 +26,7 @@ import ManageUsers from '../pages/admin/ManageUsers';
 import ManageBlocks from '../pages/admin/ManageBlocks';
 import ManageFloors from '../pages/admin/ManageFloors';
 import ManageRooms from '../pages/admin/ManageRooms';
+import ManageRoomNumbersPage from '../pages/admin/ManageRoomNumbersPage';
 import ManageDepartments from '../pages/admin/ManageDepartments';
 import ManageFacilities from '../pages/admin/ManageFacilities';
 import CampusSettings from '../pages/admin/CampusSettings';
@@ -40,7 +42,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   );
 
   if (!userInfo) return <Navigate to="/login" />;
-  if (adminOnly && userInfo.role !== 'admin') return <Navigate to="/campus-twin" />;
+  if (adminOnly && userInfo.role !== 'admin') return <Navigate to="/dashboard" />;
 
   return children;
 };
@@ -54,10 +56,12 @@ const AppRoutes = () => {
       {/* Auth Routes */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Route>
 
       {/* Protected Main Routes */}
       <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/campus-twin" element={<CampusTwinPage />} />
 
         <Route path="/blocks" element={<BlocksPage />} />
@@ -81,6 +85,7 @@ const AppRoutes = () => {
         <Route path="/admin/digital-twin/import-export" element={<ProtectedRoute adminOnly><DataImportExportPage /></ProtectedRoute>} />
         <Route path="/admin/digital-twin/validation" element={<ProtectedRoute adminOnly><ValidationPage /></ProtectedRoute>} />
 
+        <Route path="/admin/room-numbers" element={<ProtectedRoute adminOnly><ManageRoomNumbersPage /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute adminOnly><ManageUsers /></ProtectedRoute>} />
         <Route path="/admin/blocks" element={<ProtectedRoute adminOnly><ManageBlocks /></ProtectedRoute>} />
         <Route path="/admin/floors" element={<ProtectedRoute adminOnly><ManageFloors /></ProtectedRoute>} />

@@ -1,27 +1,40 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, UserPlus, CheckCircle } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
-const LoginPage = () => {
+const RegisterPage = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await register({ name, email, password });
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to sign in. Please check your credentials.');
+      setError(err.response?.data?.message || 'Failed to register account. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -30,17 +43,36 @@ const LoginPage = () => {
   return (
     <div>
       <div>
-        <h2 className="text-2xl font-bold font-display text-gray-900">Welcome back</h2>
-        <p className="mt-2 text-sm text-gray-600">Please sign in to your account</p>
+        <h2 className="text-2xl font-bold font-display text-gray-900">Create account</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Sign up to access the Campus Twin dashboard & navigation
+        </p>
       </div>
 
       <div className="mt-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg">
               {error}
             </div>
           )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Full Name</label>
+            <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="John Doe"
+              />
+            </div>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Email Address</label>
@@ -71,7 +103,24 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="••••••••"
+                placeholder="At least 6 characters"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <CheckCircle className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="Re-enter password"
               />
             </div>
           </div>
@@ -84,19 +133,22 @@ const LoginPage = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                Signing in...
+                Creating account...
               </>
             ) : (
-              'Sign in'
+              <>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Register Account
+              </>
             )}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
-              Register here
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
+              Sign in here
             </Link>
           </p>
         </div>
@@ -105,4 +157,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

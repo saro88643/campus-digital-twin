@@ -86,7 +86,7 @@ const ManageUsers = () => {
         if (!updateData.password) delete updateData.password;
         await api.put(`/users/${editingUser._id}`, updateData);
       } else {
-        await api.post('/auth/register', formData);
+        await api.post('/users', formData);
       }
       handleCloseModal();
       fetchUsers();

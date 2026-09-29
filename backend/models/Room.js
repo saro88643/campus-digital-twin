@@ -67,6 +67,14 @@ const roomSchema = mongoose.Schema(
       enum: ['Available', 'Occupied', 'Under Maintenance', 'Temporarily Closed'],
       default: 'Available',
     },
+    // Occupancy Details with Start (From) and End (Until) Date/Time
+    occupancy: {
+      eventName: { type: String, default: '' },
+      occupiedBySection: { type: String, default: '' },
+      occupiedFrom: { type: Date, default: null },
+      occupiedUntil: { type: Date, default: null },
+      notes: { type: String, default: '' },
+    },
     // Digital Twin Mapping attributes
     digitalTwinMapped: {
       type: Boolean,
