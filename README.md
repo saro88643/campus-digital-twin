@@ -1,89 +1,114 @@
-# Campus Digital Twin — Production MERN Rebuild
+# Campus Digital Twin — Sri Shakthi Institute of Engineering & Technology
 
-A professional, standalone institution management platform built with the MERN stack (MongoDB, Express, React, Node.js). This version replaces all legacy mock data and platform dependencies with a real full-stack architecture.
+A professional, standalone digital twin and smart campus management platform built with the MERN stack (MongoDB, Express, React, Node.js).
+
+---
+
+## 🌐 Live Application URLs
+
+* **Frontend App (Vercel)**: [https://campus-digital-twin-ruby.vercel.app](https://campus-digital-twin-ruby.vercel.app)
+* **Backend API (Render)**: [https://campus-digital-twin.onrender.com](https://campus-digital-twin.onrender.com)
+* **Health Check**: [https://campus-digital-twin.onrender.com/health](https://campus-digital-twin.onrender.com/health)
+
+---
 
 ## 🚀 Key Features
 
-*   **Real-time Institutional Data**: Manage blocks, floors, and rooms with persistent MongoDB storage.
-*   **Architectural Navigator**: Multi-level hierarchy (Campus > Block > Floor > Room) with real-time status.
-*   **Security & Authentication**: Genuine JWT-based auth with role-based access control (Admin & User).
-*   **Asset Management**: Centralized tracking for facilities (AC, Projectors, Labs) and maintenance logs.
-*   **Departmental Directory**: Academic and administrative governance registry.
-*   **Admin Suite**: Full CRUD operations for all institutional entities + dashboard metrics.
+* **Interactive Indoor Digital Twin & Navigation**: Live floor plan mapping, room routing, and classroom occupancy tracking.
+* **Real-time Institutional Data**: Manage blocks, floors, and rooms with persistent MongoDB Atlas storage.
+* **User Registration & Role-Based Access Control**:
+  * **Public Registration**: Self-service user registration (`role: user`) to access the dashboard and campus twin.
+  * **Admin Governance**: Previous administrators can manage personnel and assign new administrator access (`role: admin`).
+* **Asset & Facility Management**: Track labs, smart boards, projectors, and departmental assets with maintenance logs.
+* **Campus & Departmental Directory**: Comprehensive academic registry and room details.
+* **Live Dashboard & Metrics**: Real-time room status breakdowns, recent activity auditing, and quick navigation.
+
+---
 
 ## 🛠️ Technology Stack
 
-*   **Frontend**: React (Vite), Tailwind CSS, Lucide Icons, Axios.
-*   **Backend**: Node.js, Express.js, JWT, Bcrypt.js.
-*   **Database**: MongoDB (Mongoose ODM).
+* **Frontend**: React (Vite), Tailwind CSS, Lucide Icons, React Router DOM, Axios.
+* **Backend**: Node.js, Express.js, JWT Authentication, Bcrypt.js, Express Mongo Sanitize, Helmet.
+* **Database**: MongoDB Atlas (Mongoose ODM).
+* **Hosting**: Vercel (Frontend), Render (Backend).
+
+---
+
+## 🔑 Initial Credentials
+
+You can create your own account using the **Register** option on the site, or log in with initial accounts:
+
+| Role | Email | Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@campus.edu` | `admin123` | Full Administrative & System Control |
+| **Standard User** | `user@campus.edu` | `user123` | Campus Navigation & Overview |
 
 ---
 
 ## 💻 Local Setup Instructions
 
 ### 1. Database Initialization
-Ensure your local **MongoDB Server** is running on port `27017`. Run the seed script from the root to populate the initial campus structure and accounts:
+Ensure your MongoDB connection string is set in `backend/.env`. Seed initial campus structure and default accounts:
 
 ```bash
+cd backend
 npm run seed
 ```
 
 ### 2. Environment Variables
-The project is pre-configured with local defaults, but you can customize them in the `.env` files:
 
-*   **Backend (`backend/.env`)**:
-    *   `PORT=5000`
-    *   `MONGO_URI=mongodb://127.0.0.1:27017/campus-twin`
-    *   `JWT_SECRET=campus_twin_jwt_secret_key_2026`
-*   **Frontend (`frontend/.env`)**:
-    *   `VITE_API_URL=http://localhost:5000/api`
+* **Backend (`backend/.env`)**:
+  ```env
+  PORT=5000
+  MONGO_URI=your_mongodb_connection_string
+  JWT_SECRET=campus_twin_jwt_secret_key_2026
+  NODE_ENV=production
+  ```
 
-### 3. Running the Platform
-Install all dependencies and launch both servers concurrently:
+* **Frontend (`frontend/.env`)**:
+  ```env
+  VITE_API_URL=http://localhost:5000/api
+  ```
 
-```bash
-npm run install:all
-npm run dev
-```
+### 3. Running the App Locally
 
-Visit **http://localhost:5173** to launch the digital twin.
+* **Backend**:
+  ```bash
+  cd backend
+  npm install
+  npm run dev
+  ```
 
----
+* **Frontend**:
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
 
-## 🔑 Demo Accounts
-
-Use these credentials to explore the different access levels:
-
-| Role | Email | Password | Access Level |
-| :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@campus.edu` | `admin123` | Full control + Dashboard |
-| **Standard User** | `user@campus.edu` | `user123` | Institutional Read-only |
+Visit **http://localhost:5173** in your browser.
 
 ---
 
 ## 📡 API Reference
 
-The backend exposes a comprehensive RESTful API under the `/api` prefix:
+The backend exposes a RESTful API under the `/api` prefix:
 
-*   `POST /api/auth/login`: Authenticate and receive JWT.
-*   `GET /api/dashboard/stats`: Retrieve institutional aggregate metrics.
-*   `GET /api/blocks`: List all building infrastructures.
-*   `GET /api/rooms?floorId=...`: Search and filter workspace units.
-*   `PUT /api/campus`: Update institution metadata (Admin only).
-
----
-
-## 🏗️ Production Deployment
-
-### Frontend (Vercel)
-1. Push the `frontend` folder to GitHub.
-2. Deploy to Vercel and set the `VITE_API_URL` to your production backend.
-
-### Backend (Render)
-1. Push the `backend` folder to GitHub.
-2. Deploy as a Web Service on Render.
-3. Configure your production MongoDB URI (e.g., MongoDB Atlas) in the environment variables.
+* `POST /api/auth/register`: Public registration for standard users.
+* `POST /api/auth/login`: Authenticate user and return JWT.
+* `GET /api/auth/me`: Get current authenticated user details.
+* `GET /api/dashboard/stats`: Retrieve aggregate metrics and live activity logs.
+* `GET /api/blocks`: List all building infrastructures.
+* `GET /api/rooms`: List and search classrooms/labs.
+* `POST /api/users`: Admin creation of new users or administrators.
 
 ---
 
-*© 2026 Campus Twin Platform. Rebuilt as an independent standalone system.*
+## 🏗️ Production Deployment Details
+
+* **Frontend**: Hosted on Vercel with SPA rewrite rules (`frontend/vercel.json`) pointing to `index.html`.
+* **Backend**: Hosted on Render as a Web Service connected to MongoDB Atlas.
+
+---
+
+*© 2026 Campus Twin Platform.*
